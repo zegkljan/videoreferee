@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.camera2.slowmo
+package cz.zegkljan.videoreferee
 
 import android.Manifest
 import android.content.Context

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.camera2.slowmo.fragments
+package cz.zegkljan.videoreferee.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -47,14 +47,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
-import com.example.android.camera.utils.OrientationLiveData
-import com.example.android.camera.utils.SIZE_1080P
-import com.example.android.camera.utils.SmartSize
-import com.example.android.camera.utils.getDisplaySmartSize
-import com.example.android.camera2.slowmo.BuildConfig
-import com.example.android.camera2.slowmo.CameraActivity
-import com.example.android.camera2.slowmo.R
-import com.example.android.camera2.slowmo.databinding.FragmentCameraBinding
+import cz.zegkljan.videoreferee.utils.OrientationLiveData
+import cz.zegkljan.videoreferee.utils.SIZE_1080P
+import cz.zegkljan.videoreferee.utils.SmartSize
+import cz.zegkljan.videoreferee.utils.getDisplaySmartSize
+import cz.zegkljan.videoreferee.BuildConfig
+import cz.zegkljan.videoreferee.CameraActivity
+import cz.zegkljan.videoreferee.R
+import cz.zegkljan.videoreferee.databinding.FragmentCameraBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

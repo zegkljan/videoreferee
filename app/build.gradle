@@ -23,7 +23,7 @@ android {
     compileSdkVersion 30
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        applicationId "com.android.example.camera2.slowmo"
+        applicationId "cz.zegkljan.videoreferee"
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1

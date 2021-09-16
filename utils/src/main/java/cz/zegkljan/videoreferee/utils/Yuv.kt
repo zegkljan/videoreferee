@@ -1,4 +1,4 @@
-package com.example.android.camera.utils
+package cz.zegkljan.videoreferee.utils
 
 import android.graphics.ImageFormat
 import android.media.Image

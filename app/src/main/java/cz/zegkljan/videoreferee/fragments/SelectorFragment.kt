@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.camera2.slowmo.fragments
+package cz.zegkljan.videoreferee.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -30,8 +30,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.android.camera.utils.GenericListAdapter
-import com.example.android.camera2.slowmo.R
+import cz.zegkljan.videoreferee.utils.GenericListAdapter
+import cz.zegkljan.videoreferee.R
 
 /**
  * In this [Fragment] we let users pick a camera, size and FPS to use for high

@@ -16,7 +16,7 @@
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.android.camera2.slowmo">
+    package="cz.zegkljan.videoreferee">
 
     <!-- Permission declarations -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -32,7 +32,7 @@
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
 
         <activity
-            android:name="com.example.android.camera2.slowmo.CameraActivity"
+            android:name="cz.zegkljan.videoreferee.CameraActivity"
             android:clearTaskOnLaunch="true"
             android:theme="@style/AppTheme">
 

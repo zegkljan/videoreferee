@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/permissions_fragment"
-        android:name="com.example.android.camera2.slowmo.fragments.PermissionsFragment"
+        android:name="cz.zegkljan.videoreferee.fragments.PermissionsFragment"
         android:label="Permissions" >
 
         <action
@@ -35,7 +35,7 @@
 
     <fragment
         android:id="@+id/selector_fragment"
-        android:name="com.example.android.camera2.slowmo.fragments.SelectorFragment"
+        android:name="cz.zegkljan.videoreferee.fragments.SelectorFragment"
         android:label="Selector" >
 
         <action
@@ -47,7 +47,7 @@
 
     <fragment
         android:id="@+id/camera_fragment"
-        android:name="com.example.android.camera2.slowmo.fragments.CameraFragment"
+        android:name="cz.zegkljan.videoreferee.fragments.CameraFragment"
         android:label="Camera" >
 
         <argument
