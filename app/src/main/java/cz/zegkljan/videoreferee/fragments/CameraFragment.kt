@@ -126,21 +126,6 @@ class CameraFragment : Fragment() {
     /** [Handler] corresponding to [cameraThread] */
     private val cameraHandler = Handler(cameraThread.looper)
 
-    /** Performs recording animation of flashing screen */
-    private val animationTask: Runnable by lazy {
-        Runnable {
-            // Flash white animation
-            fragmentCameraBinding.overlay.foreground = Color.argb(150, 255, 255, 255).toDrawable()
-            // Wait for ANIMATION_FAST_MILLIS
-            fragmentCameraBinding.overlay.postDelayed({
-                // Remove white flash animation
-                fragmentCameraBinding.overlay.foreground = null
-                // Restart animation recursively
-                fragmentCameraBinding.overlay.postDelayed(animationTask, CameraActivity.ANIMATION_FAST_MILLIS)
-            }, CameraActivity.ANIMATION_FAST_MILLIS)
-        }
-    }
-
     /** Captures high speed frames from a [CameraDevice] for our slow motion video recording */
     private lateinit var session: CameraConstrainedHighSpeedCaptureSession
 
@@ -330,16 +315,9 @@ class CameraFragment : Fragment() {
                     }
                     recordingStartMillis = System.currentTimeMillis()
                     Log.d(TAG, "Recording started")
-
-                    // Starts recording animation
-                    fragmentCameraBinding.overlay.post(animationTask)
                 }
 
                 MotionEvent.ACTION_UP -> lifecycleScope.launch(Dispatchers.IO) {
-
-                    // Unlocks screen rotation after recording finished
-                    requireActivity().requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
                     // Requires recording of at least MIN_REQUIRED_RECORDING_TIME_MILLIS
                     val elapsedTimeMillis = System.currentTimeMillis() - recordingStartMillis
@@ -350,8 +328,9 @@ class CameraFragment : Fragment() {
                     Log.d(TAG, "Recording stopped. Output file: $outputFile")
                     recorder.stop()
 
-                    // Removes recording animation
-                    fragmentCameraBinding.overlay.removeCallbacks(animationTask)
+                    // Unlocks screen rotation after recording finished
+                    requireActivity().requestedOrientation =
+                        ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
                     // Broadcasts the media file to the rest of the system
                     MediaScannerConnection.scanFile(
