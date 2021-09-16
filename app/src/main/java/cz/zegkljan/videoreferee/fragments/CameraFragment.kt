@@ -293,14 +293,13 @@ class CameraFragment : Fragment() {
         session.setRepeatingBurst(previewRequestList, null, cameraHandler)
 
         // Listen to the capture button
-        fragmentCameraBinding.captureButton.setOnTouchListener { view, event ->
-            when (event.action) {
-
-                MotionEvent.ACTION_DOWN -> lifecycleScope.launch(Dispatchers.IO) {
+        fragmentCameraBinding.captureButton.setOnCheckedChangeListener { view, isChecked ->
+            if (isChecked) {
+                lifecycleScope.launch(Dispatchers.IO) {
 
                     // Prevents screen rotation during the video recording
                     requireActivity().requestedOrientation =
-                            ActivityInfo.SCREEN_ORIENTATION_LOCKED
+                        ActivityInfo.SCREEN_ORIENTATION_LOCKED
 
                     // Stops preview requests, and start record requests
                     session.stopRepeating()
@@ -314,10 +313,11 @@ class CameraFragment : Fragment() {
                         start()
                     }
                     recordingStartMillis = System.currentTimeMillis()
+                    fragmentCameraBinding.captureButton.background
                     Log.d(TAG, "Recording started")
                 }
-
-                MotionEvent.ACTION_UP -> lifecycleScope.launch(Dispatchers.IO) {
+            } else {
+                lifecycleScope.launch(Dispatchers.IO) {
 
                     // Requires recording of at least MIN_REQUIRED_RECORDING_TIME_MILLIS
                     val elapsedTimeMillis = System.currentTimeMillis() - recordingStartMillis
@@ -334,13 +334,14 @@ class CameraFragment : Fragment() {
 
                     // Broadcasts the media file to the rest of the system
                     MediaScannerConnection.scanFile(
-                            view.context, arrayOf(outputFile.absolutePath), null, null)
+                        view.context, arrayOf(outputFile.absolutePath), null, null
+                    )
 
                     // Launch external activity via intent to play video recorded using our provider
                     startActivity(Intent().apply {
                         action = Intent.ACTION_VIEW
                         type = MimeTypeMap.getSingleton()
-                                .getMimeTypeFromExtension(outputFile.extension)
+                            .getMimeTypeFromExtension(outputFile.extension)
                         val authority = "${BuildConfig.APPLICATION_ID}.provider"
                         data = FileProvider.getUriForFile(view.context, authority, outputFile)
                         flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or
@@ -352,8 +353,6 @@ class CameraFragment : Fragment() {
                     navController.popBackStack()
                 }
             }
-
-            true
         }
     }
 
