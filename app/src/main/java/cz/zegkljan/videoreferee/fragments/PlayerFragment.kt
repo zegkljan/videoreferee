@@ -16,9 +16,8 @@
 
 package cz.zegkljan.videoreferee.fragments
 
-import android.content.Context
-import android.hardware.camera2.params.StreamConfigurationMap
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,8 +28,6 @@ import androidx.navigation.fragment.navArgs
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentPlayerBinding
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 
 class PlayerFragment : Fragment() {
 
@@ -69,6 +66,10 @@ class PlayerFragment : Fragment() {
             }
         }
         fragmentPlayerBinding.doneButton.setOnClickListener {
+            val file = File(args.filename)
+            if (!file.delete()) {
+                Log.e(TAG, "Failed to delete file $file")
+            }
             navController.navigate(PlayerFragmentDirections.actionPlayerToCamera(args.cameraId, args.width, args.height, args.fps))
         }
     }
@@ -88,17 +89,5 @@ class PlayerFragment : Fragment() {
 
     companion object {
         private val TAG = PlayerFragment::class.java.simpleName
-
-        /**
-         * FPS rate for preview-only requests, 30 is *guaranteed* by framework. See:
-         * [StreamConfigurationMap.getHighSpeedVideoFpsRanges]
-         */
-        private const val FPS_PREVIEW_ONLY: Int = 30
-
-        /** Creates a [File] named with the current date and time */
-        private fun createFile(context: Context, extension: String): File {
-            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
-            return File(context.filesDir, "VID_${sdf.format(Date())}.$extension")
-        }
     }
 }
