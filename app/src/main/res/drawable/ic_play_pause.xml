@@ -15,6 +15,6 @@
   ~ limitations under the License.
   -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_checked="true" android:drawable="@android:drawable/ic_media_pause" />
-    <item android:drawable="@android:drawable/ic_media_pause" />
+    <item android:state_checked="true" android:drawable="@drawable/ic_baseline_pause_24" />
+    <item android:drawable="@drawable/ic_baseline_play_arrow_24" />
 </selector>

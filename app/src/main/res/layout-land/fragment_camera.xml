@@ -30,7 +30,7 @@
         android:id="@+id/capture_button"
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:layout_marginRight="64dp"
+        android:layout_marginRight="32dp"
         android:scaleType="fitCenter"
         android:background="@drawable/ic_shutter"
         android:text=""
