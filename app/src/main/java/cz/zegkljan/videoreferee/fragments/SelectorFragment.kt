@@ -18,6 +18,7 @@ package cz.zegkljan.videoreferee.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Color
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Bundle
@@ -30,8 +31,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import cz.zegkljan.videoreferee.utils.GenericListAdapter
 import cz.zegkljan.videoreferee.R
+import cz.zegkljan.videoreferee.utils.GenericListAdapter
 
 /**
  * In this [Fragment] we let users pick a camera, size and FPS to use for high
@@ -59,7 +60,10 @@ class SelectorFragment : Fragment() {
 
             val layoutId = android.R.layout.simple_list_item_1
             adapter = GenericListAdapter(cameraList, itemLayoutId = layoutId) { view, item, _ ->
-                view.findViewById<TextView>(android.R.id.text1).text = item.title
+                view.findViewById<TextView>(android.R.id.text1).apply {
+                    text = item.title
+                    setTextColor(Color.parseColor("#ffffff"))
+                }
                 view.setOnClickListener {
                     Navigation.findNavController(requireActivity(), R.id.fragment_container)
                             .navigate(SelectorFragmentDirections.actionSelectorToCamera(
