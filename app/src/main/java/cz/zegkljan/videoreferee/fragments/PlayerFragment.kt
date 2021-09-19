@@ -16,9 +16,13 @@
 
 package cz.zegkljan.videoreferee.fragments
 
+import android.media.AudioAttributes
+import android.media.MediaPlayer
+import android.media.PlaybackParams
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
@@ -28,6 +32,7 @@ import androidx.navigation.fragment.navArgs
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentPlayerBinding
 import java.io.File
+import kotlin.math.roundToInt
 
 class PlayerFragment : Fragment() {
 
@@ -44,6 +49,16 @@ class PlayerFragment : Fragment() {
         Navigation.findNavController(requireActivity(), R.id.fragment_container)
     }
 
+    /** Media session for playback. */
+    private lateinit var mediaPlayer: MediaPlayer
+
+    /** Milliseconds per frame. */
+    private var mspf: Int = -1
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -55,16 +70,87 @@ class PlayerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        fragmentPlayerBinding.filename.text = args.filename
-        fragmentPlayerBinding.fps.text = args.fps.toString()
+        fragmentPlayerBinding.playerScreen.holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(holder: SurfaceHolder) {
+                //val size = getVideoOutputSize(fragmentPlayerBinding.playerScreen.display)
+                fragmentPlayerBinding.playerScreen.setAspectRatio(args.width, args.height)
+                fragmentPlayerBinding.playerScreen.post { initializePlayer() }
+            }
 
-        fragmentPlayerBinding.playPauseButton.setOnCheckedChangeListener { buttonView, isChecked ->
+            override fun surfaceChanged(
+                holder: SurfaceHolder,
+                format: Int,
+                width: Int,
+                height: Int
+            ) = Unit
+
+            override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
+        })
+    }
+
+    override fun onStop() {
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mediaPlayer.release()
+    }
+
+    override fun onDestroyView() {
+        _fragmentPlayerBinding = null
+        super.onDestroyView()
+    }
+
+    fun initializePlayer() {
+        mediaPlayer = createMediaPlayer()
+        mspf = (1000f / args.fps).roundToInt()
+
+        // player listeners
+        mediaPlayer.setOnCompletionListener {
+            fragmentPlayerBinding.playPauseButton.isChecked = false
+        }
+
+        // control listeners
+        fragmentPlayerBinding.playPauseButton.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                fragmentPlayerBinding.state.text = "playing"
+                mediaPlayer.start()
             } else {
-                fragmentPlayerBinding.state.text = "paused"
+                mediaPlayer.pause()
             }
         }
+        fragmentPlayerBinding.rewindButton.setOnClickListener {
+            mediaPlayer.seekTo(0)
+        }
+        fragmentPlayerBinding.speed1.isChecked = true
+        fragmentPlayerBinding.playbackSpeedSelect.setOnCheckedChangeListener { _, checkedId ->
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+            }
+            val pp = mediaPlayer.playbackParams
+            try {
+                when (checkedId) {
+                    fragmentPlayerBinding.speed1.id -> mediaPlayer.playbackParams =
+                        PlaybackParams().setSpeed(1f)
+                    fragmentPlayerBinding.speed12.id -> mediaPlayer.playbackParams =
+                        PlaybackParams().setSpeed(1f / 2f)
+                    fragmentPlayerBinding.speed14.id -> mediaPlayer.playbackParams =
+                        PlaybackParams().setSpeed(1f / 4f)
+                    fragmentPlayerBinding.speed18.id -> mediaPlayer.playbackParams =
+                        PlaybackParams().setSpeed(1f / 8f)
+                    fragmentPlayerBinding.speed116.id -> mediaPlayer.playbackParams =
+                        PlaybackParams().setSpeed(1f / 16f)
+                }
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Unsupported playback speed.")
+                mediaPlayer.playbackParams = pp
+            }
+            if (mediaPlayer.isPlaying) {
+                mediaPlayer.pause()
+            }
+        }
+
+        // navigation out
         fragmentPlayerBinding.doneButton.setOnClickListener {
             val file = File(args.filename)
             if (!file.delete()) {
@@ -74,17 +160,19 @@ class PlayerFragment : Fragment() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    override fun onDestroyView() {
-        _fragmentPlayerBinding = null
-        super.onDestroyView()
+    private fun createMediaPlayer(): MediaPlayer {
+        return MediaPlayer().apply {
+            setDataSource(args.filename)
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+            )
+            setDisplay(fragmentPlayerBinding.playerScreen.holder)
+            prepare()
+            seekTo(0)
+        }
     }
 
     companion object {
