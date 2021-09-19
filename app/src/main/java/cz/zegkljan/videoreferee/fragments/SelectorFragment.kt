@@ -18,7 +18,6 @@ package cz.zegkljan.videoreferee.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Bundle
@@ -62,7 +61,6 @@ class SelectorFragment : Fragment() {
             adapter = GenericListAdapter(cameraList, itemLayoutId = layoutId) { view, item, _ ->
                 view.findViewById<TextView>(android.R.id.text1).apply {
                     text = item.title
-                    setTextColor(Color.parseColor("#ffffff"))
                 }
                 view.setOnClickListener {
                     Navigation.findNavController(requireActivity(), R.id.fragment_container)
