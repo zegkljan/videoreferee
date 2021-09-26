@@ -24,7 +24,7 @@ android {
     defaultConfig {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         applicationId "cz.zegkljan.videoreferee"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 30
         versionCode 1
         versionName "1.0.0"
@@ -80,6 +80,11 @@ dependencies {
 
     // Media
     implementation 'androidx.media:media:1.4.2'
+
+    // ExoPlayer
+    def exoplayer_version = "2.15.1"
+    implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
+    implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
 
     // Unit testing
     testImplementation 'androidx.test.ext:junit:1.1.3'

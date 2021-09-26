@@ -16,19 +16,20 @@
 
 package cz.zegkljan.videoreferee.fragments
 
-import android.media.AudioAttributes
-import android.media.MediaPlayer
-import android.media.PlaybackParams
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.SurfaceHolder
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentPlayerBinding
 import java.io.File
@@ -36,10 +37,12 @@ import kotlin.math.roundToInt
 
 class PlayerFragment : Fragment() {
 
-    /** Android ViewBinding */
-    private var _fragmentPlayerBinding: FragmentPlayerBinding? = null
+    private var playbackPosition = 0L
+    private var currentWindow = 0
+    private var plWhenReady = false
 
-    private val fragmentPlayerBinding get() = _fragmentPlayerBinding!!
+    /** Android ViewBinding */
+    private lateinit var fragmentPlayerBinding: FragmentPlayerBinding
 
     /** AndroidX navigation arguments */
     private val args: PlayerFragmentArgs by navArgs()
@@ -49,104 +52,81 @@ class PlayerFragment : Fragment() {
         Navigation.findNavController(requireActivity(), R.id.fragment_container)
     }
 
-    /** Media session for playback. */
-    private lateinit var mediaPlayer: MediaPlayer
+    /**  Player */
+    private var player: SimpleExoPlayer? = null
+    private val playbackStateListener: Player.Listener = object: Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            val stateString: String = when (playbackState) {
+                ExoPlayer.STATE_IDLE -> "ExoPlayer.STATE_IDLE"
+                ExoPlayer.STATE_BUFFERING -> "ExoPlayer.STATE_BUFFERING"
+                ExoPlayer.STATE_READY -> "ExoPlayer.STATE_READY"
+                ExoPlayer.STATE_ENDED -> "ExoPlayer.STATE_ENDED"
+                else -> "UNKNOWN_STATE"
+            }
+            Log.d(TAG, "playback state changed to $stateString")
+        }
+    }
 
     /** Milliseconds per frame. */
     private var mspf: Int = -1
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _fragmentPlayerBinding = FragmentPlayerBinding.inflate(inflater, container, false)
+        fragmentPlayerBinding = FragmentPlayerBinding.inflate(inflater, container, false)
         return fragmentPlayerBinding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        fragmentPlayerBinding.playerScreen.holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                //val size = getVideoOutputSize(fragmentPlayerBinding.playerScreen.display)
-                fragmentPlayerBinding.playerScreen.setAspectRatio(args.width, args.height)
-                fragmentPlayerBinding.playerScreen.post { initializePlayer() }
-            }
-
-            override fun surfaceChanged(
-                holder: SurfaceHolder,
-                format: Int,
-                width: Int,
-                height: Int
-            ) = Unit
-
-            override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
-        })
+    override fun onStart() {
+        super.onStart()
+        initializePlayer()
     }
 
     override fun onStop() {
         super.onStop()
+        releasePlayer()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        mediaPlayer.release()
-    }
-
-    override fun onDestroyView() {
-        _fragmentPlayerBinding = null
-        super.onDestroyView()
-    }
-
-    fun initializePlayer() {
-        mediaPlayer = createMediaPlayer()
+    private fun initializePlayer() {
         mspf = (1000f / args.fps).roundToInt()
 
-        // player listeners
-        mediaPlayer.setOnCompletionListener {
-            fragmentPlayerBinding.playPauseButton.isChecked = false
-        }
+        player = SimpleExoPlayer.Builder(requireContext())
+            .build()
+            .also { exoPlayer ->
+                fragmentPlayerBinding.playerView.player = exoPlayer
+                val mediaItem = MediaItem.fromUri(Uri.fromFile(File(args.filename)))
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.playWhenReady = plWhenReady
+                exoPlayer.seekTo(currentWindow, playbackPosition)
+                exoPlayer.addListener(playbackStateListener)
+                exoPlayer.prepare()
+            }
 
         // control listeners
-        fragmentPlayerBinding.playPauseButton.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                mediaPlayer.start()
-            } else {
-                mediaPlayer.pause()
-            }
-        }
-        fragmentPlayerBinding.rewindButton.setOnClickListener {
-            mediaPlayer.seekTo(0)
-        }
         fragmentPlayerBinding.speed1.isChecked = true
-        fragmentPlayerBinding.playbackSpeedSelect.setOnCheckedChangeListener { _, checkedId ->
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
+        fragmentPlayerBinding.playbackSpeedSelect.setOnCheckedChangeListener listener@{ _, checkedId ->
+            if (player == null) {
+                return@listener
             }
-            val pp = mediaPlayer.playbackParams
+            val p = player!!
+            if (p.isPlaying) {
+                p.pause()
+            }
             try {
                 when (checkedId) {
-                    fragmentPlayerBinding.speed1.id -> mediaPlayer.playbackParams =
-                        PlaybackParams().setSpeed(1f)
-                    fragmentPlayerBinding.speed12.id -> mediaPlayer.playbackParams =
-                        PlaybackParams().setSpeed(1f / 2f)
-                    fragmentPlayerBinding.speed14.id -> mediaPlayer.playbackParams =
-                        PlaybackParams().setSpeed(1f / 4f)
-                    fragmentPlayerBinding.speed18.id -> mediaPlayer.playbackParams =
-                        PlaybackParams().setSpeed(1f / 8f)
-                    fragmentPlayerBinding.speed116.id -> mediaPlayer.playbackParams =
-                        PlaybackParams().setSpeed(1f / 16f)
+                    fragmentPlayerBinding.speed1.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f)
+                    fragmentPlayerBinding.speed12.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 2f)
+                    fragmentPlayerBinding.speed14.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 4f)
+                    fragmentPlayerBinding.speed18.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 8f)
+                    fragmentPlayerBinding.speed116.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 16f)
                 }
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Unsupported playback speed.")
-                mediaPlayer.playbackParams = pp
+                Log.e(TAG, "Unsupported playback speed: ${checkedId}.")
             }
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
+            if (p.isPlaying) {
+                p.pause()
             }
         }
 
@@ -160,19 +140,15 @@ class PlayerFragment : Fragment() {
         }
     }
 
-    private fun createMediaPlayer(): MediaPlayer {
-        return MediaPlayer().apply {
-            setDataSource(args.filename)
-            setAudioAttributes(
-                AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .build()
-            )
-            setDisplay(fragmentPlayerBinding.playerScreen.holder)
-            prepare()
-            seekTo(0)
+    private fun releasePlayer() {
+        player?.run {
+            playbackPosition = this.currentPosition
+            currentWindow = this.currentWindowIndex
+            plWhenReady = this.playWhenReady
+            removeListener(playbackStateListener)
+            release()
         }
+        player = null
     }
 
     companion object {
