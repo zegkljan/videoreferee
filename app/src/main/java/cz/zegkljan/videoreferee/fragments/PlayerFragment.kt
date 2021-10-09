@@ -24,6 +24,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
+import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import com.google.android.exoplayer2.ExoPlayer
@@ -136,7 +137,13 @@ class PlayerFragment : Fragment() {
             if (!file.delete()) {
                 Log.e(TAG, "Failed to delete file $file")
             }
-            navController.navigate(PlayerFragmentDirections.actionPlayerToCamera(args.cameraId, args.width, args.height, args.fps))
+            val navDirections: NavDirections
+            if (args.isHighSpeed) {
+                navDirections = PlayerFragmentDirections.actionPlayerToHighSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+            } else {
+                navDirections = PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+            }
+            navController.navigate(navDirections)
         }
     }
 

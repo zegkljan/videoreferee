@@ -50,7 +50,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class CameraFragment : Fragment() {
+class HighSpeedCameraFragment : Fragment() {
 
     /** Android ViewBinding */
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
@@ -58,7 +58,7 @@ class CameraFragment : Fragment() {
     private val fragmentCameraBinding get() = _fragmentCameraBinding!!
 
     /** AndroidX navigation arguments */
-    private val args: CameraFragmentArgs by navArgs()
+    private val args: HighSpeedCameraFragmentArgs by navArgs()
 
     /** Host's navigation controller */
     private val navController: NavController by lazy {
@@ -278,12 +278,13 @@ class CameraFragment : Fragment() {
                     // navigate to player
                     requireActivity().runOnUiThread {
                         navController.navigate(
-                            CameraFragmentDirections.actionCameraToPlayer(
+                            HighSpeedCameraFragmentDirections.actionHighSpeedCameraToPlayer(
                                 outputFile.absolutePath,
                                 args.cameraId,
                                 args.width,
                                 args.height,
-                                args.fps
+                                args.fps,
+                                true
                             )
                         )
                     }
@@ -383,7 +384,7 @@ class CameraFragment : Fragment() {
     }
 
     companion object {
-        private val TAG = CameraFragment::class.java.simpleName
+        private val TAG = HighSpeedCameraFragment::class.java.simpleName
 
         private const val RECORDER_VIDEO_BITRATE: Int = 10000000
         private const val MIN_REQUIRED_RECORDING_TIME_MILLIS: Long = 1000L
