@@ -18,7 +18,6 @@ package cz.zegkljan.videoreferee.fragments
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,7 +63,7 @@ class PlayerFragment : Fragment() {
                 ExoPlayer.STATE_ENDED -> "ExoPlayer.STATE_ENDED"
                 else -> "UNKNOWN_STATE"
             }
-            Log.d(TAG, "playback state changed to $stateString")
+            // Log.d(TAG, "playback state changed to $stateString")
         }
     }
 
@@ -124,7 +123,7 @@ class PlayerFragment : Fragment() {
                     fragmentPlayerBinding.speed116.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 16f)
                 }
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Unsupported playback speed: ${checkedId}.")
+                // Log.e(TAG, "Unsupported playback speed: ${checkedId}.")
             }
             if (p.isPlaying) {
                 p.pause()
@@ -135,13 +134,12 @@ class PlayerFragment : Fragment() {
         fragmentPlayerBinding.doneButton.setOnClickListener {
             val file = File(args.filename)
             if (!file.delete()) {
-                Log.e(TAG, "Failed to delete file $file")
+                // Log.e(TAG, "Failed to delete file $file")
             }
-            val navDirections: NavDirections
-            if (args.isHighSpeed) {
-                navDirections = PlayerFragmentDirections.actionPlayerToHighSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+            val navDirections: NavDirections = if (args.isHighSpeed) {
+                PlayerFragmentDirections.actionPlayerToHighSpeedCamera(args.cameraId, args.width, args.height, args.fps)
             } else {
-                navDirections = PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+                PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(args.cameraId, args.width, args.height, args.fps)
             }
             navController.navigate(navDirections)
         }

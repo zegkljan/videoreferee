@@ -26,7 +26,6 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.util.Log
 import android.util.Range
 import android.util.Size
 import android.view.*
@@ -84,7 +83,7 @@ class HighSpeedCameraFragment : Fragment() {
      * camera session without preparing the recorder
      */
     private val recorderSurface: Surface by lazy {
-        Log.d(TAG, "recorderSurface lazy")
+        // Log.d(TAG, "recorderSurface lazy")
         // Get a persistent Surface from MediaCodec, don't forget to release when done
         val surface = MediaCodec.createPersistentInputSurface()
 
@@ -116,7 +115,7 @@ class HighSpeedCameraFragment : Fragment() {
 
     /** Requests used for preview only in the [CameraConstrainedHighSpeedCaptureSession] */
     private val previewRequestList: List<CaptureRequest> by lazy {
-        Log.d(TAG, "previewRequestList lazy")
+        // Log.d(TAG, "previewRequestList lazy")
         // Capture request holds references to target surfaces
         session.device.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
             // Add the preview surface target
@@ -132,7 +131,7 @@ class HighSpeedCameraFragment : Fragment() {
 
     /** Requests used for preview and recording in the [CameraConstrainedHighSpeedCaptureSession] */
     private val recordRequestList: List<CaptureRequest> by lazy {
-        Log.d(TAG, "recordRequestList lazy")
+        // Log.d(TAG, "recordRequestList lazy")
         // Capture request holds references to target surfaces
         session.device.createCaptureRequest(CameraDevice.TEMPLATE_RECORD).apply {
             // Add the preview and recording surface targets
@@ -163,7 +162,7 @@ class HighSpeedCameraFragment : Fragment() {
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        Log.d(TAG, "onViewCreated")
+        // Log.d(TAG, "onViewCreated")
         super.onViewCreated(view, savedInstanceState)
         fragmentCameraBinding.viewFinder.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
@@ -174,7 +173,7 @@ class HighSpeedCameraFragment : Fragment() {
                     height: Int) = Unit
 
             override fun surfaceCreated(holder: SurfaceHolder) {
-                Log.d(TAG, "onViewCreated/surfaceCreated")
+                // Log.d(TAG, "onViewCreated/surfaceCreated")
                 fragmentCameraBinding.viewFinder.setAspectRatio(args.width, args.height)
 
                 // To ensure that size is set, initialize camera in the view's thread
@@ -185,14 +184,14 @@ class HighSpeedCameraFragment : Fragment() {
         // Used to rotate the output media to match device orientation
         relativeOrientation = OrientationLiveData(requireContext(), characteristics).apply {
             observe(viewLifecycleOwner, Observer {
-                orientation -> Log.d(TAG, "Orientation changed: $orientation")
+                // orientation -> Log.d(TAG, "Orientation changed: $orientation")
             })
         }
     }
 
     /** Creates a [MediaRecorder] instance using the provided [Surface] as input */
     private fun createRecorder(surface: Surface): MediaRecorder {
-        Log.d(TAG, "createRecorder")
+        // Log.d(TAG, "createRecorder")
         return MediaRecorder().apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setVideoSource(MediaRecorder.VideoSource.SURFACE)
@@ -215,7 +214,7 @@ class HighSpeedCameraFragment : Fragment() {
      */
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeCamera() = lifecycleScope.launch(Dispatchers.Main) {
-        Log.d(TAG, "initializeCamera")
+        // Log.d(TAG, "initializeCamera")
         // Open the selected camera
         camera = openCamera(cameraManager, args.cameraId, cameraHandler)
 
@@ -256,7 +255,7 @@ class HighSpeedCameraFragment : Fragment() {
                     }
                     recordingStartMillis = System.currentTimeMillis()
                     fragmentCameraBinding.captureButton.background
-                    Log.d(TAG, "Recording started")
+                    // Log.d(TAG, "Recording started")
                 }
             } else {
                 lifecycleScope.launch(Dispatchers.IO) {
@@ -268,7 +267,7 @@ class HighSpeedCameraFragment : Fragment() {
                         delay(MIN_REQUIRED_RECORDING_TIME_MILLIS - elapsedTimeMillis)
                     }
 
-                    Log.d(TAG, "Recording stopped. Output file: $outputFile")
+                    // Log.d(TAG, "Recording stopped. Output file: $outputFile")
                     recorder.stop()
 
                     // Unlocks screen rotation after recording finished
@@ -300,21 +299,21 @@ class HighSpeedCameraFragment : Fragment() {
             cameraId: String,
             handler: Handler? = null
     ): CameraDevice = suspendCancellableCoroutine { cont ->
-        Log.d(TAG, "openCamera")
+        // Log.d(TAG, "openCamera")
         manager.openCamera(cameraId, object : CameraDevice.StateCallback() {
             override fun onOpened(device: CameraDevice) {
-                Log.d(TAG, "openCamera/onOpened")
+                // Log.d(TAG, "openCamera/onOpened")
                 cont.resume(device)
             }
 
             override fun onDisconnected(device: CameraDevice) {
-                Log.d(TAG, "openCamera/onDisconnected")
-                Log.w(TAG, "Camera $cameraId has been disconnected")
+                // Log.d(TAG, "openCamera/onDisconnected")
+                // Log.w(TAG, "Camera $cameraId has been disconnected")
                 requireActivity().finish()
             }
 
             override fun onError(device: CameraDevice, error: Int) {
-                Log.d(TAG, "openCamera/onError")
+                // Log.d(TAG, "openCamera/onError")
                 val msg = when(error) {
                     ERROR_CAMERA_DEVICE -> "Fatal (device)"
                     ERROR_CAMERA_DISABLED -> "Device policy"
@@ -324,7 +323,7 @@ class HighSpeedCameraFragment : Fragment() {
                     else -> "Unknown"
                 }
                 val exc = RuntimeException("Camera $cameraId error: ($error) $msg")
-                Log.e(TAG, exc.message, exc)
+                // Log.e(TAG, exc.message, exc)
                 if (cont.isActive) cont.resumeWithException(exc)
             }
         }, handler)
@@ -339,38 +338,38 @@ class HighSpeedCameraFragment : Fragment() {
             targets: List<Surface>,
             handler: Handler? = null
     ): CameraConstrainedHighSpeedCaptureSession = suspendCoroutine { cont ->
-        Log.d(TAG, "createCaptureSession")
+        // Log.d(TAG, "createCaptureSession")
         // Creates a capture session using the predefined targets, and defines a session state
         // callback which resumes the coroutine once the session is configured
         device.createConstrainedHighSpeedCaptureSession(
                 targets, object: CameraCaptureSession.StateCallback() {
 
             override fun onConfigured(session: CameraCaptureSession) {
-                Log.d(TAG, "createCaptureSession/onConfigured")
+                // Log.d(TAG, "createCaptureSession/onConfigured")
                 cont.resume(session as CameraConstrainedHighSpeedCaptureSession)
             }
 
             override fun onConfigureFailed(session: CameraCaptureSession) {
-                Log.d(TAG, "createCaptureSession/onConfigureFailed")
+                // Log.d(TAG, "createCaptureSession/onConfigureFailed")
                 val exc = RuntimeException("Camera ${device.id} session configuration failed")
-                Log.e(TAG, exc.message, exc)
+                // Log.e(TAG, exc.message, exc)
                 cont.resumeWithException(exc)
             }
         }, handler)
     }
 
     override fun onStop() {
-        Log.d(TAG, "onStop")
+        // Log.d(TAG, "onStop")
         super.onStop()
         try {
             camera.close()
         } catch (exc: Throwable) {
-            Log.e(TAG, "Error closing camera", exc)
+            // Log.e(TAG, "Error closing camera", exc)
         }
     }
 
     override fun onDestroy() {
-        Log.d(TAG, "onDestroy")
+        // Log.d(TAG, "onDestroy")
         super.onDestroy()
         cameraThread.quitSafely()
         recorder.release()
@@ -378,7 +377,7 @@ class HighSpeedCameraFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        Log.d(TAG, "onDestroyView")
+        // Log.d(TAG, "onDestroyView")
         _fragmentCameraBinding = null
         super.onDestroyView()
     }
@@ -397,7 +396,7 @@ class HighSpeedCameraFragment : Fragment() {
 
         /** Creates a [File] named with the current date and time */
         private fun createFile(context: Context, extension: String): File {
-            Log.d(TAG, "createFile")
+            // Log.d(TAG, "createFile")
             val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
             return File(context.filesDir, "VID_${sdf.format(Date())}.$extension")
         }

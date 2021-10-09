@@ -22,12 +22,12 @@ apply plugin: "androidx.navigation.safeargs"
 android {
     compileSdkVersion 30
     defaultConfig {
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         applicationId "cz.zegkljan.videoreferee"
+        versionCode 1
+        versionName "0.1.0"
         minSdkVersion 24
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0.0"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 
     compileOptions {
@@ -71,7 +71,7 @@ dependencies {
     // App compat and UI things
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
 
     // Navigation library
     def nav_version = "2.3.5"

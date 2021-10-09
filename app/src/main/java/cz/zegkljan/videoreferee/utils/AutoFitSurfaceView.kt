@@ -18,7 +18,6 @@ package cz.zegkljan.videoreferee.utils
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.SurfaceView
 import kotlin.math.roundToInt
 
@@ -68,7 +67,7 @@ class AutoFitSurfaceView @JvmOverloads constructor(
                 newWidth = (height * actualRatio).roundToInt()
             }
 
-            Log.d(TAG, "Measured dimensions set: $newWidth x $newHeight")
+            // Log.d(TAG, "Measured dimensions set: $newWidth x $newHeight")
             setMeasuredDimension(newWidth, newHeight)
         }
     }

@@ -66,12 +66,11 @@ class SelectorFragment : Fragment() {
                     text = item.title
                 }
                 view.setOnClickListener {
-                    val navDirections: NavDirections
-                    if (item.isHighSpeed) {
-                        navDirections = SelectorFragmentDirections.actionSelectorToHighSpeedCamera(
+                    val navDirections: NavDirections = if (item.isHighSpeed) {
+                        SelectorFragmentDirections.actionSelectorToHighSpeedCamera(
                             item.cameraId, item.size.width, item.size.height, item.fps)
                     } else {
-                        navDirections = SelectorFragmentDirections.actionSelectorToNormalSpeedCamera(
+                        SelectorFragmentDirections.actionSelectorToNormalSpeedCamera(
                             item.cameraId, item.size.width, item.size.height, item.fps)
                     }
                     Navigation.findNavController(requireActivity(), R.id.fragment_container)

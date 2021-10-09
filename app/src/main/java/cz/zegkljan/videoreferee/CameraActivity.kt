@@ -17,7 +17,6 @@
 package cz.zegkljan.videoreferee
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import cz.zegkljan.videoreferee.databinding.ActivityCameraBinding
@@ -27,14 +26,14 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var activityCameraBinding: ActivityCameraBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(TAG, "onCreate")
+        // Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
         activityCameraBinding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(activityCameraBinding.root)
     }
 
     override fun onResume() {
-        Log.d(TAG, "onResume")
+        // Log.d(TAG, "onResume")
         super.onResume()
         // Before setting full screen flags, we must wait a bit to let UI settle; otherwise, we may
         // be trying to set app to immersive mode before it's ready and the flags do not stick
