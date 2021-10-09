@@ -16,6 +16,7 @@ The app has the following workflow:
 
 ## Download and installation
 Scan this QR code to download the APK:
+
 ![https://github.com/zegkljan/videoreferee/releases/latest/download/VideoReferee-release.apk](download-qr.png?raw=true "APK download")
 
 Or download manually:
