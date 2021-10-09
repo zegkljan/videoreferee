@@ -10,6 +10,6 @@ The app has the following workflow:
 0. Lanuch the app.
 1. Ask for permissions (if not already granted).
 2. Select capture resolution and frame rate.
-3. Viewfinder - capture video.
-4. Analysis - seek through, slow down, step frame by frame...
-5. Repeat from step 3. or 2.
+3. Capture video.
+4. Seek through, slow down...
+5. Tap the ✓ button to go back to step 3, or press the native back button to go to step 2.

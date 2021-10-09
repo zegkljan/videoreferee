@@ -36,3 +36,7 @@ proguard-project.txt
 .idea
 
 # utils/
+
+# Security files
+keystore.jks
+keystore.properties
