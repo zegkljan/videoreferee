@@ -13,3 +13,14 @@ The app has the following workflow:
 3. Capture video.
 4. Seek through, slow down...
 5. Tap the ✓ button to go back to step 3, or press the native back button to go to step 2.
+
+## Download and installation
+1. Head to the [latest release](https://github.com/zegkljan/videoreferee/releases/latest).
+2. Download the APK.
+3. Install on your Android device.
+
+You will need to enable installation from unknown sources, as this is not Google Play.
+
+## Notes
+I'm no android app developer.
+I just was not happy with any of the apps that I have found for this job, so I just went ahead and made my own, heavily based on [Camera2SlowMotion and Camera2Video samples](https://github.com/android/camera-samples).
