@@ -41,7 +41,7 @@ android {
         targetSdkVersion 30
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
 
-        setProperty("archivesBaseName", "VideoReferee-$versionName")
+        setProperty("archivesBaseName", "VideoReferee")
     }
 
     compileOptions {

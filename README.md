@@ -15,6 +15,10 @@ The app has the following workflow:
 5. Tap the ✓ button to go back to step 3, or press the native back button to go to step 2.
 
 ## Download and installation
+Scan this QR code to download the APK:
+![https://github.com/zegkljan/videoreferee/releases/latest/download/VideoReferee-release.apk](download-qr.png?raw=true "APK download")
+
+Or download manually:
 1. Head to the [latest release](https://github.com/zegkljan/videoreferee/releases/latest).
 2. Download the APK.
 3. Install on your Android device.
