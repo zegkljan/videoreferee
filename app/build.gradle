@@ -104,6 +104,11 @@ dependencies {
     // Vertical seekbar
     implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0'
 
+    // Network
+    def ktor_version = "1.6.4"
+    implementation "io.ktor:ktor-client-core:$ktor_version"
+    implementation "io.ktor:ktor-client-android:$ktor_version"
+
     // Unit testing
     testImplementation 'androidx.test.ext:junit:1.1.3'
     testImplementation 'androidx.test:rules:1.4.0'

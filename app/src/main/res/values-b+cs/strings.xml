@@ -14,18 +14,18 @@
  limitations under the License.
 -->
 <resources>
-    <string name="app_name">Video Referee</string>
-    <string name="new_version_title">New version available</string>
+    <string name="app_name">Video rozhodčí</string>
+    <string name="new_version_title">Nová verze k dispozici</string>
     <string name="new_version_message">
-        A newer version of the app, %1$s, is available.
-        Now you have version %2$s.
-        Go to the download page?
+        K dispozici je novější verze aplikace %1$s.
+        Nyní máte verzi %2$s.
+        Přejít na stránku ke stažení?
     </string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="no_dont_ask">No and don\'t ask</string>
-    <string name="capture">Capture</string>
-    <string name="play_pause">Play/Pause</string>
-    <string name="done">Done</string>
-    <string name="rewind">Rewind to start</string>
+    <string name="yes">Ano</string>
+    <string name="no">Ne</string>
+    <string name="no_dont_ask">Ne a neptat se znovu</string>
+    <string name="capture">Záznam</string>
+    <string name="play_pause">Přehrát/Zastavit</string>
+    <string name="done">Hotovo</string>
+    <string name="rewind">Skočit na začátek</string>
 </resources>
