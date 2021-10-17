@@ -74,7 +74,11 @@ class VersionCheckFragment : Fragment() {
         val version = Version.fromVersionString(info.versionName)
 
         lifecycleScope.launch {
-            val latest = getReleases().last()
+            val latest = getLatestRelease()
+            if (latest == null) {
+                leave()
+                return@launch
+            }
 
             if (version < latest.version) {
                 AlertDialog.Builder(requireActivity()).apply {
@@ -107,7 +111,7 @@ class VersionCheckFragment : Fragment() {
         Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(VersionCheckFragmentDirections.actionVersionCheckToPermissions())
     }
 
-    private suspend fun getReleases(): List<Release> {
+    private suspend fun getLatestRelease(): Release? {
         val client = HttpClient(Android) {
             engine {
                 connectTimeout = 500
@@ -115,11 +119,16 @@ class VersionCheckFragment : Fragment() {
             }
         }
 
-        val response: HttpResponse = client.request(GIT_RELEASES) {
-            method = HttpMethod.Get
-            header("Accept", "application/vnd.github.v3+json")
+        val res: String
+        try {
+            val response: HttpResponse = client.request(GIT_RELEASES) {
+                method = HttpMethod.Get
+                header("Accept", "application/vnd.github.v3+json")
+            }
+            res = response.receive()
+        } catch (e: Exception) {
+            return null
         }
-        val res: String = response.receive()
         val jsonReleases = JSONTokener(res).nextValue() as JSONArray
         val releases = mutableListOf<Release>()
         for (i in 0 until jsonReleases.length()) {
@@ -129,7 +138,7 @@ class VersionCheckFragment : Fragment() {
             releases.add(Release(ver, url))
         }
         releases.sort()
-        return releases
+        return releases.last()
     }
 
     companion object {
