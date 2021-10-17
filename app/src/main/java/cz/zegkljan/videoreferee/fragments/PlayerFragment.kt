@@ -16,11 +16,13 @@
 
 package cz.zegkljan.videoreferee.fragments
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SeekBar
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
@@ -89,6 +91,7 @@ class PlayerFragment : Fragment() {
         releasePlayer()
     }
 
+    @SuppressLint("SetTextI18n")
     private fun initializePlayer() {
         mspf = (1000f / args.fps).roundToInt()
 
@@ -105,30 +108,65 @@ class PlayerFragment : Fragment() {
             }
 
         // control listeners
-        fragmentPlayerBinding.speed1.isChecked = true
-        fragmentPlayerBinding.playbackSpeedSelect.setOnCheckedChangeListener listener@{ _, checkedId ->
-            if (player == null) {
-                return@listener
-            }
-            val p = player!!
-            if (p.isPlaying) {
-                p.pause()
-            }
-            try {
-                when (checkedId) {
-                    fragmentPlayerBinding.speed1.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f)
-                    fragmentPlayerBinding.speed12.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 2f)
-                    fragmentPlayerBinding.speed14.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 4f)
-                    fragmentPlayerBinding.speed18.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 8f)
-                    fragmentPlayerBinding.speed116.id -> p.playbackParameters = p.playbackParameters.withSpeed(1f / 16f)
+        val max = fragmentPlayerBinding.playbackSpeedSeek.max
+        fragmentPlayerBinding.playbackSpeedText.text = "1x"
+        fragmentPlayerBinding.playbackSpeedSeek.progress = fragmentPlayerBinding.playbackSpeedSeek.max
+        fragmentPlayerBinding.playbackSpeedSeek.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+            var progress = max
+            var wasPlaying = false
+            var dragging = false
+
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser || player == null) {
+                    return
                 }
-            } catch (e: IllegalArgumentException) {
-                // Log.e(TAG, "Unsupported playback speed: ${checkedId}.")
+                this.progress = progress
+                fragmentPlayerBinding.playbackSpeedText.text = progressToText(seekBar, progress)
+                if (!dragging) {
+                    setPlaybackSpeed(seekBar)
+                }
             }
-            if (p.isPlaying) {
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                if (player == null) {
+                    return
+                }
+                dragging = true
+                val p = player!!
+                wasPlaying = p.isPlaying
                 p.pause()
             }
-        }
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                if (player == null) {
+                    return
+                }
+                dragging = false
+                setPlaybackSpeed(seekBar)
+                if (wasPlaying) {
+                    player!!.play()
+                }
+            }
+
+            fun progressToSpeed(seekBar: SeekBar?, progress: Int): Float {
+                val value = seekBar!!.max - progress + 1
+                return 1f / value.toFloat()
+            }
+
+            fun progressToText(seekBar: SeekBar?, progress: Int): String {
+                val value = seekBar!!.max - progress + 1
+                return if (value == 1) {
+                    "1x"
+                } else {
+                    "1/${value}x"
+                }
+            }
+
+            fun setPlaybackSpeed(seekBar: SeekBar?) {
+                val p = player!!
+                val speed = progressToSpeed(seekBar, progress)
+                p.playbackParameters = p.playbackParameters.withSpeed(speed)
+            }
+        })
 
         // navigation out
         fragmentPlayerBinding.doneButton.setOnClickListener {

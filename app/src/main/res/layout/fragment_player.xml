@@ -26,59 +26,45 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <RadioGroup
-        android:id="@+id/playback_speed_select"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="64dp"
-        android:layout_marginRight="32dp"
-        android:theme="@style/AppTheme"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="RtlHardcoded">
-        <RadioButton
-            android:id="@+id/speed_1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="1"
-            tools:ignore="HardcodedText" />
-        <RadioButton
-            android:id="@+id/speed_1_2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="1/2"
-            tools:ignore="HardcodedText" />
-        <RadioButton
-            android:id="@+id/speed_1_4"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="1/4"
-            tools:ignore="HardcodedText" />
-        <RadioButton
-            android:id="@+id/speed_1_8"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="1/8"
-            tools:ignore="HardcodedText" />
-        <RadioButton
-            android:id="@+id/speed_1_16"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="1/16"
-            tools:ignore="HardcodedText" />
-    </RadioGroup>
-
     <Button
         android:id="@+id/done_button"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_marginRight="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_margin="32dp"
         android:background="@drawable/ic_baseline_check_24"
         android:contentDescription="@string/done"
         android:scaleType="fitCenter"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         tools:ignore="RtlHardcoded" />
+
+    <TextView
+        android:id="@+id/playback_speed_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="32dp"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@id/done_button"
+        app:layout_constraintLeft_toLeftOf="@id/done_button"
+        app:layout_constraintRight_toRightOf="@id/done_button"/>
+
+    <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintLeft_toLeftOf="@id/done_button"
+        app:layout_constraintRight_toRightOf="@id/done_button"
+        app:layout_constraintTop_toBottomOf="@id/playback_speed_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="120dp"
+        android:layout_marginBottom="64dp">
+        <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
+            android:id="@+id/playback_speed_seek"
+            android:max="24"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:splitTrack="false"
+            app:seekBarRotation="CW270" />
+    </com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBarWrapper>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

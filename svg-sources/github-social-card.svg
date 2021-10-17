@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="338.66666mm"
+   height="169.33333mm"
+   viewBox="0 0 338.66666 169.33333"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="github-social-card.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   inkscape:export-filename="/tmp/video-referee.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview20"
+     pagecolor="#ffffff"
+     bordercolor="#111111"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.58894227"
+     inkscape:cx="535.70616"
+     inkscape:cy="412.60411"
+     inkscape:window-width="1920"
+     inkscape:window-height="1011"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5" />
+  <defs
+     id="defs2">
+    <pattern
+       xlink:href="#Strips1_1"
+       id="pattern3107"
+       patternTransform="matrix(7.2649535,0,0,5.4523807,10.011351,2.3620191)" />
+    <pattern
+       patternUnits="userSpaceOnUse"
+       width="2"
+       height="1"
+       patternTransform="translate(0,0) scale(10,10)"
+       id="Strips1_1">
+      <rect
+         style="fill:black;stroke:none"
+         x="0"
+         y="-0.5"
+         width="1"
+         height="2"
+         id="rect2088" />
+    </pattern>
+  </defs>
+  <rect
+     style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.300001;stroke-linecap:round;stroke-opacity:1;stop-color:#000000"
+     id="rect1480"
+     width="338.66666"
+     height="169.33333"
+     x="0"
+     y="0" />
+  <g
+     id="g2065"
+     transform="matrix(1.7245501,0,0,1.7262989,4.6766375,-6.6737757)"
+     style="stroke-width:0.579567">
+    <path
+       id="path6298"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.436413;stroke-linecap:round;stop-color:#000000"
+       d="M 15,25.556974 H 51.59105 L 57.142,20.265307 h 9 l 5.55095,5.291667 H 85 c 2.77,0 5,2.23 5,5 v 50 c 0,2.77 -2.23,5 -5,5 H 15 c -2.77,0 -5,-2.23 -5,-5 v -50 c 0,-2.77 2.23,-5 5,-5 z" />
+    <path
+       id="rect5431"
+       style="stroke:none;stroke-width:0.579567;stroke-linecap:round;stop-color:#000000"
+       d="m 21.227779,22.304382 h 6.577782 c 0.554,0 1,0.446 1,1 v 2.034054 h -8.577782 v -2.034054 c 0,-0.554 0.446,-1 1,-1 z" />
+    <path
+       id="rect854"
+       style="fill:url(#pattern3107);stroke:#000000;stroke-width:0.436413;stroke-linecap:round;stop-color:#000000"
+       d="M 15,25.556974 H 51.59105 L 57.142,20.265307 h 9 l 5.55095,5.291667 H 85 c 2.77,0 5,2.23 5,5 v 50 c 0,2.77 -2.23,5 -5,5 H 15 c -2.77,0 -5,-2.23 -5,-5 v -50 c 0,-2.77 2.23,-5 5,-5 z" />
+    <circle
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.436413;stroke-linecap:round;stroke-opacity:1;stop-color:#000000"
+       id="circle3189"
+       cx="61.641678"
+       cy="57.144474"
+       r="14.527846" />
+    <circle
+       style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.579567;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;stop-color:#000000"
+       id="path1024"
+       cx="61.641678"
+       cy="57.144474"
+       r="13" />
+    <circle
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.436413;stroke-linecap:round;stroke-opacity:1;stop-color:#000000"
+       id="circle5263"
+       cx="61.641678"
+       cy="57.144474"
+       r="9.8057432" />
+  </g>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:45.8149px;line-height:1.25;font-family:Eczar;-inkscape-font-specification:'Eczar, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;stroke-width:0.264582"
+     x="246.66724"
+     y="74.252258"
+     id="text3851"><tspan
+       id="tspan3849"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:45.8149px;font-family:Eczar;-inkscape-font-specification:'Eczar, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264582"
+       x="246.66724"
+       y="74.252258">Video</tspan><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:45.8149px;font-family:Eczar;-inkscape-font-specification:'Eczar, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.264582"
+       x="246.66724"
+       y="121.97614"
+       id="tspan3853">Referee</tspan></text>
+</svg>

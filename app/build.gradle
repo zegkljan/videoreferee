@@ -35,8 +35,8 @@ android {
     compileSdkVersion 30
     defaultConfig {
         applicationId "cz.zegkljan.videoreferee"
-        versionCode 1
-        versionName "0.1.0"
+        versionCode 2
+        versionName "0.2.0"
         minSdkVersion 24
         targetSdkVersion 30
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
@@ -94,12 +94,15 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
     // Media
-    implementation 'androidx.media:media:1.4.2'
+    implementation 'androidx.media:media:1.4.3'
 
     // ExoPlayer
     def exoplayer_version = "2.15.1"
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
+
+    // Vertical seekbar
+    implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0'
 
     // Unit testing
     testImplementation 'androidx.test.ext:junit:1.1.3'
