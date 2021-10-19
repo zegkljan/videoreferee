@@ -26,14 +26,11 @@ import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavDirections
-import androidx.navigation.Navigation
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import cz.zegkljan.videoreferee.R
-import cz.zegkljan.videoreferee.utils.GenericListAdapter
+import cz.zegkljan.videoreferee.databinding.FragmentSelectorBinding
+import io.ktor.http.cio.websocket.*
 
 /**
  * In this [Fragment] we let users pick a camera, size and FPS to use for high
@@ -41,54 +38,137 @@ import cz.zegkljan.videoreferee.utils.GenericListAdapter
  */
 class SelectorFragment : Fragment() {
 
+    /** Android ViewBinding */
+    private lateinit var fragmentSelectorBinding: FragmentSelectorBinding
+
+    private var selectedCameraId: String? = null
+    private var selectedResolution: Size? = null
+    private var selectedFps: Int? = null
+    private var isSelectedFpsHighSpeed: Boolean? = null
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = RecyclerView(requireContext())
+    ): View {
+        fragmentSelectorBinding = FragmentSelectorBinding.inflate(inflater, container, false)
+        return fragmentSelectorBinding.root
+    }
 
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        view as RecyclerView
-        view.apply {
-            layoutManager = LinearLayoutManager(requireContext())
 
-            val cameraManager =
-                    requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val cameraManager = requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, enumerateCameras(cameraManager)).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            fragmentSelectorBinding.cameraSpinner.adapter = adapter
+        }
 
-            val highSpeedConfigs = enumerateHighSpeedCameras(cameraManager)
-            val normalConfigs = enumerateVideoCameras(cameraManager)
+        fragmentSelectorBinding.cameraSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val cameraInfo = parent!!.getItemAtPosition(position) as CameraInfo
+                selectedCameraId = cameraInfo.cameraId
 
-            val layoutId = android.R.layout.simple_list_item_1
-            adapter = GenericListAdapter(highSpeedConfigs + normalConfigs, itemLayoutId = layoutId) { view, item, _ ->
-                view.findViewById<TextView>(android.R.id.text1).apply {
-                    text = item.title
+                ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, enumerateResolutions(cameraManager, cameraInfo.cameraId)).also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    fragmentSelectorBinding.resolutionSpinner.adapter = adapter
                 }
-                view.setOnClickListener {
-                    val navDirections: NavDirections = if (item.isHighSpeed) {
-                        SelectorFragmentDirections.actionSelectorToHighSpeedCamera(
-                            item.cameraId, item.size.width, item.size.height, item.fps)
-                    } else {
-                        SelectorFragmentDirections.actionSelectorToNormalSpeedCamera(
-                            item.cameraId, item.size.width, item.size.height, item.fps)
-                    }
-                    Navigation.findNavController(requireActivity(), R.id.fragment_container)
-                            .navigate(navDirections)
-                }
+                fragmentSelectorBinding.resolutionSpinner.isEnabled = true
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedCameraId = null
+                selectedResolution = null
+                selectedFps = null
+                isSelectedFpsHighSpeed = null
+
+                fragmentSelectorBinding.resolutionSpinner.isEnabled = false
+                fragmentSelectorBinding.resolutionSpinner.adapter = null
+
+                fragmentSelectorBinding.fpsSpinner.isEnabled = false
+                fragmentSelectorBinding.fpsSpinner.adapter = null
             }
         }
 
+        fragmentSelectorBinding.resolutionSpinner.isEnabled = false
+        fragmentSelectorBinding.resolutionSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val resInfo = parent!!.getItemAtPosition(position) as ResolutionInfo
+                selectedResolution = resInfo.size
+
+                ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, enumerateFramerates(cameraManager, selectedCameraId!!, resInfo)).also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    fragmentSelectorBinding.fpsSpinner.adapter = adapter
+                }
+                fragmentSelectorBinding.fpsSpinner.isEnabled = true
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedResolution = null
+                selectedFps = null
+                isSelectedFpsHighSpeed = null
+
+                fragmentSelectorBinding.fpsSpinner.isEnabled = false
+                fragmentSelectorBinding.fpsSpinner.adapter = null
+            }
+        }
+
+        fragmentSelectorBinding.fpsSpinner.isEnabled = false
+        fragmentSelectorBinding.fpsSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                val fpsInfo = parent!!.getItemAtPosition(position) as FramerateInfo
+                selectedFps = fpsInfo.fps
+                isSelectedFpsHighSpeed = fpsInfo.isHighSpeed
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                selectedFps = null
+                isSelectedFpsHighSpeed = null
+            }
+        }
     }
 
     companion object {
 
         private data class CameraInfo(
-                val title: String,
-                val cameraId: String,
-                val size: Size,
-                val fps: Int,
-                val isHighSpeed: Boolean)
+            val orientation: String,
+            val cameraId: String
+        ) {
+            override fun toString(): String {
+                return "$orientation ($cameraId)"
+            }
+        }
+
+        private data class ResolutionInfo(
+            val size: Size,
+            val isHighSpeed: Boolean,
+            val isNormalSpeed: Boolean
+        ) {
+            override fun toString(): String = size.toString()
+        }
+
+        private data class FramerateInfo(
+            val fps: Int,
+            val isHighSpeed: Boolean
+        ) {
+            override fun toString(): String = fps.toString()
+        }
 
         /** Converts a lens orientation enum into a human-readable string */
         private fun lensOrientationString(value: Int) = when(value) {
@@ -98,87 +178,58 @@ class SelectorFragment : Fragment() {
             else -> "Unknown"
         }
 
-        /** Lists all high speed cameras and supported resolution and FPS combinations */
-        @SuppressLint("InlinedApi")
-        private fun enumerateHighSpeedCameras(cameraManager: CameraManager): List<CameraInfo> {
-            val availableCameras: MutableList<CameraInfo> = mutableListOf()
-
-            // Iterate over the list of cameras and add those with high speed video recording
-            //  capability to our output. This function only returns those cameras that declare
-            //  constrained high speed video recording, but some cameras may be capable of doing
-            //  unconstrained video recording with high enough FPS for some use cases and they will
-            //  not necessarily declare constrained high speed video capability.
-            cameraManager.cameraIdList.forEach { id ->
+        private fun enumerateCameras(cameraManager: CameraManager): List<CameraInfo>
+            = cameraManager.cameraIdList.map { id ->
                 val characteristics = cameraManager.getCameraCharacteristics(id)
-                val orientation = lensOrientationString(
-                        characteristics.get(CameraCharacteristics.LENS_FACING)!!)
-
-                // Query the available capabilities and output formats
-                val capabilities = characteristics.get(
-                        CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)!!
-                val cameraConfig = characteristics.get(
-                        CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
-
-                // Return cameras that support constrained high video capability
-                if (capabilities.contains(CameraCharacteristics
-                                .REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO)) {
-                    // For each camera, list its compatible sizes and FPS ranges
-                    cameraConfig.highSpeedVideoSizes.forEach { size ->
-                        cameraConfig.getHighSpeedVideoFpsRangesFor(size).forEach { fpsRange ->
-                            val fps = fpsRange.upper
-                            val info = CameraInfo(
-                                    "$orientation ($id) $size $fps FPS", id, size, fps, true)
-
-                            // Only report the highest FPS in the range, avoid duplicates
-                            if (!availableCameras.contains(info)) availableCameras.add(info)
-                        }
-                    }
-                }
-
+                val orientation = lensOrientationString(characteristics.get(CameraCharacteristics.LENS_FACING)!!)
+                val info = CameraInfo(orientation, id)
+                info
             }
 
-            return availableCameras
-        }
-
-        /** Lists all video-capable cameras and supported resolution and FPS combinations */
-        @SuppressLint("InlinedApi")
-        private fun enumerateVideoCameras(cameraManager: CameraManager): List<CameraInfo> {
-            val availableCameras: MutableList<CameraInfo> = mutableListOf()
-
-            cameraManager.cameraIdList.forEach { id ->
-                val characteristics = cameraManager.getCameraCharacteristics(id)
-                val orientation = lensOrientationString(
-                    characteristics.get(CameraCharacteristics.LENS_FACING)!!)
-
-                // Query the available capabilities and output formats
-                val capabilities = characteristics.get(
-                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)!!
-                val cameraConfig = characteristics.get(
-                    CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
-
-                // Return cameras that declare to be backward compatible
-                if (capabilities.contains(CameraCharacteristics
-                        .REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE)) {
-                    // Recording should always be done in the most efficient format, which is
-                    //  the format native to the camera framework
-                    val targetClass = MediaRecorder::class.java
-
-                    // For each size, list the expected FPS
-                    cameraConfig.getOutputSizes(targetClass).forEach { size ->
-                        // Get the number of seconds that each frame will take to process
-                        val secondsPerFrame =
-                            cameraConfig.getOutputMinFrameDuration(targetClass, size) /
-                                    1_000_000_000.0
-                        // Compute the frames per second to let user select a configuration
-                        val fps = if (secondsPerFrame > 0) (1.0 / secondsPerFrame).toInt() else 0
-                        val fpsLabel = if (fps > 0) "$fps" else "N/A"
-                        availableCameras.add(CameraInfo(
-                            "$orientation ($id) $size $fpsLabel FPS", id, size, fps, false))
+        private fun enumerateResolutions(cameraManager: CameraManager, cameraId: String): List<ResolutionInfo> {
+            val characteristics = cameraManager.getCameraCharacteristics(cameraId)
+            val capabilities = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES)!!
+            val cameraConfig = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+            val sizes = mutableSetOf<ResolutionInfo>()
+            if (capabilities.contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_BACKWARD_COMPATIBLE)) {
+                sizes.addAll(cameraConfig.getOutputSizes(MediaRecorder::class.java).map { ResolutionInfo(it, isHighSpeed = false, isNormalSpeed = true) })
+            }
+            if (capabilities.contains(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO)) {
+                cameraConfig.highSpeedVideoSizes.forEach {
+                    val nsRes = ResolutionInfo(it, isHighSpeed = false, isNormalSpeed = true)
+                    if (sizes.contains(nsRes)) {
+                        sizes.remove(nsRes)
+                        sizes.add(ResolutionInfo(it, isHighSpeed = true, isNormalSpeed = true))
+                    } else {
+                        sizes.add(ResolutionInfo(it, isHighSpeed = false, isNormalSpeed = true))
                     }
                 }
             }
-
-            return availableCameras
+            return sizes.toMutableList().sortedWith { o1, o2 ->
+                if (o1.size.width == o2.size.width) {
+                    return@sortedWith o1.size.height.compareTo(o2.size.height)
+                }
+                return@sortedWith o1.size.width.compareTo(o2.size.width)
+            }
         }
+
+        private fun enumerateFramerates(cameraManager: CameraManager, cameraId: String, res: ResolutionInfo): List<FramerateInfo> {
+            val characteristics = cameraManager.getCameraCharacteristics(cameraId)
+            val cameraConfig = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)!!
+            val fpss = mutableSetOf<FramerateInfo>()
+            if (res.isNormalSpeed) {
+                val secondsPerFrame = cameraConfig.getOutputMinFrameDuration(MediaRecorder::class.java, res.size) / 1_000_000_000.0
+                val fps = if (secondsPerFrame > 0) (1.0 / secondsPerFrame).toInt() else 0
+                fpss.add(FramerateInfo(fps, false))
+            }
+            if (res.isHighSpeed) {
+                cameraConfig.getHighSpeedVideoFpsRangesFor(res.size).forEach { fpsRange ->
+                    val fps = fpsRange.upper
+                    fpss.add(FramerateInfo(fps, true))
+                }
+            }
+            return fpss.toMutableList().sortedWith { o1, o2 -> o1.fps.compareTo(o2.fps) }
+        }
+
     }
 }

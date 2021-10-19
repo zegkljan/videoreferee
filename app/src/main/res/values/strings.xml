@@ -24,6 +24,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="no_dont_ask">No and don\'t ask</string>
+    <string name="camera_settings">Camera settings</string>
+    <string name="camera_settings_continue">Continue</string>
     <string name="capture">Capture</string>
     <string name="play_pause">Play/Pause</string>
     <string name="done">Done</string>

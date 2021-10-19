@@ -24,6 +24,8 @@
     <string name="yes">Ano</string>
     <string name="no">Ne</string>
     <string name="no_dont_ask">Ne a neptat se znovu</string>
+    <string name="camera_settings">Nastavení kamery</string>
+    <string name="camera_settings_continue">Pokračovat</string>
     <string name="capture">Záznam</string>
     <string name="play_pause">Přehrát/Zastavit</string>
     <string name="done">Hotovo</string>
