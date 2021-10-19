@@ -29,6 +29,8 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
+import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentSelectorBinding
 import io.ktor.http.cio.websocket.*
 
@@ -59,12 +61,14 @@ class SelectorFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
+        val storedCameraId = prefs.getString(CAMERA_ID_KEY, null)
+
         val cameraManager = requireContext().getSystemService(Context.CAMERA_SERVICE) as CameraManager
         ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, enumerateCameras(cameraManager)).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             fragmentSelectorBinding.cameraSpinner.adapter = adapter
         }
-
         fragmentSelectorBinding.cameraSpinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -74,12 +78,24 @@ class SelectorFragment : Fragment() {
             ) {
                 val cameraInfo = parent!!.getItemAtPosition(position) as CameraInfo
                 selectedCameraId = cameraInfo.cameraId
+                prefs.edit().putString(CAMERA_ID_KEY, cameraInfo.cameraId).apply()
 
                 ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, enumerateResolutions(cameraManager, cameraInfo.cameraId)).also { adapter ->
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     fragmentSelectorBinding.resolutionSpinner.adapter = adapter
                 }
                 fragmentSelectorBinding.resolutionSpinner.isEnabled = true
+
+                val storedResolution = prefs.getString(RESOLUTION_KEY, null)
+                if (storedResolution != null) {
+                    for (i in 0 until fragmentSelectorBinding.resolutionSpinner.adapter.count) {
+                        val item = fragmentSelectorBinding.resolutionSpinner.adapter.getItem(i) as ResolutionInfo
+                        if (storedResolution == item.size.toString()) {
+                            fragmentSelectorBinding.resolutionSpinner.setSelection(i)
+                            break
+                        }
+                    }
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -93,6 +109,17 @@ class SelectorFragment : Fragment() {
 
                 fragmentSelectorBinding.fpsSpinner.isEnabled = false
                 fragmentSelectorBinding.fpsSpinner.adapter = null
+
+                fragmentSelectorBinding.continueButton.isEnabled = false
+            }
+        }
+        if (storedCameraId != null) {
+            for (i in 0 until fragmentSelectorBinding.cameraSpinner.adapter.count) {
+                val item = fragmentSelectorBinding.cameraSpinner.adapter.getItem(i) as CameraInfo
+                if (storedCameraId == item.cameraId) {
+                    fragmentSelectorBinding.cameraSpinner.setSelection(i)
+                    break
+                }
             }
         }
 
@@ -106,12 +133,24 @@ class SelectorFragment : Fragment() {
             ) {
                 val resInfo = parent!!.getItemAtPosition(position) as ResolutionInfo
                 selectedResolution = resInfo.size
+                prefs.edit().putString(RESOLUTION_KEY, resInfo.size.toString()).apply()
 
                 ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, enumerateFramerates(cameraManager, selectedCameraId!!, resInfo)).also { adapter ->
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     fragmentSelectorBinding.fpsSpinner.adapter = adapter
                 }
                 fragmentSelectorBinding.fpsSpinner.isEnabled = true
+
+                val storedFps = prefs.getInt(FPS_KEY, -1)
+                if (storedFps != -1) {
+                    for (i in 0 until fragmentSelectorBinding.fpsSpinner.adapter.count) {
+                        val item = fragmentSelectorBinding.fpsSpinner.adapter.getItem(i) as FramerateInfo
+                        if (storedFps == item.fps) {
+                            fragmentSelectorBinding.fpsSpinner.setSelection(i)
+                            break
+                        }
+                    }
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -121,6 +160,8 @@ class SelectorFragment : Fragment() {
 
                 fragmentSelectorBinding.fpsSpinner.isEnabled = false
                 fragmentSelectorBinding.fpsSpinner.adapter = null
+
+                fragmentSelectorBinding.continueButton.isEnabled = false
             }
         }
 
@@ -135,16 +176,34 @@ class SelectorFragment : Fragment() {
                 val fpsInfo = parent!!.getItemAtPosition(position) as FramerateInfo
                 selectedFps = fpsInfo.fps
                 isSelectedFpsHighSpeed = fpsInfo.isHighSpeed
+                prefs.edit().putInt(FPS_KEY, fpsInfo.fps).apply()
+
+                fragmentSelectorBinding.continueButton.isEnabled = true
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 selectedFps = null
                 isSelectedFpsHighSpeed = null
+
+                fragmentSelectorBinding.continueButton.isEnabled = false
             }
+        }
+
+        fragmentSelectorBinding.continueButton.isEnabled = false
+        fragmentSelectorBinding.continueButton.setOnClickListener {
+            val dir = if (isSelectedFpsHighSpeed!!) {
+                SelectorFragmentDirections.actionSelectorToHighSpeedCamera(selectedCameraId!!, selectedResolution!!.width, selectedResolution!!.height, selectedFps!!)
+            } else {
+                SelectorFragmentDirections.actionSelectorToNormalSpeedCamera(selectedCameraId!!, selectedResolution!!.width, selectedResolution!!.height, selectedFps!!)
+            }
+            Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(dir)
         }
     }
 
     companion object {
+        const val CAMERA_ID_KEY = "camera-id"
+        const val RESOLUTION_KEY = "resolution"
+        const val FPS_KEY = "fps"
 
         private data class CameraInfo(
             val orientation: String,

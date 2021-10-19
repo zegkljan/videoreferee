@@ -25,6 +25,9 @@
     <string name="no">Ne</string>
     <string name="no_dont_ask">Ne a neptat se znovu</string>
     <string name="camera_settings">Nastavení kamery</string>
+    <string name="camera_settings_camera">Kamera</string>
+    <string name="camera_settings_resolution">Rozlišení</string>
+    <string name="camera_settings_fps">Snímková frekvence (FPS)</string>
     <string name="camera_settings_continue">Pokračovat</string>
     <string name="capture">Záznam</string>
     <string name="play_pause">Přehrát/Zastavit</string>

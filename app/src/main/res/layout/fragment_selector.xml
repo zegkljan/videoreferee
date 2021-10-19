@@ -39,28 +39,65 @@
             android:layout_margin="16dp"
             />
 
-        <Spinner
-            android:id="@+id/camera_spinner"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="32dp"
-            />
+            >
+            <TextView
+                android:id="@+id/camera_spinner_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/camera_settings_camera"/>
+            <Spinner
+                android:id="@+id/camera_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/camera_spinner_label"
+                android:layout_marginTop="5dip"
+                />
+        </RelativeLayout>
 
-        <Spinner
-            android:id="@+id/resolution_spinner"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="32dp"
-            />
+            >
+            <TextView
+                android:id="@+id/resolution_spinner_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/camera_settings_resolution"/>
+            <Spinner
+                android:id="@+id/resolution_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/resolution_spinner_label"
+                android:layout_marginTop="5dip"
+                />
+        </RelativeLayout>
 
-        <Spinner
-            android:id="@+id/fps_spinner"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="32dp"
-            />
+            >
+            <TextView
+                android:id="@+id/fps_spinner_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/camera_settings_fps"/>
+            <Spinner
+                android:id="@+id/fps_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/fps_spinner_label"
+                android:layout_marginTop="5dip"
+                />
+        </RelativeLayout>
 
         <Button
+            android:id="@+id/continue_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/camera_settings_continue"
