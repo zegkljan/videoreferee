@@ -61,7 +61,7 @@
         android:layout_marginBottom="64dp">
         <com.h6ah4i.android.widget.verticalseekbar.VerticalSeekBar
             android:id="@+id/playback_speed_seek"
-            android:max="24"
+            android:max="100"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:splitTrack="false"

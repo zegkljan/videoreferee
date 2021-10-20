@@ -109,7 +109,7 @@ class PlayerFragment : Fragment() {
 
         // control listeners
         val max = fragmentPlayerBinding.playbackSpeedSeek.max
-        fragmentPlayerBinding.playbackSpeedText.text = "1x"
+        fragmentPlayerBinding.playbackSpeedText.text = "1"
         fragmentPlayerBinding.playbackSpeedSeek.progress = fragmentPlayerBinding.playbackSpeedSeek.max
         fragmentPlayerBinding.playbackSpeedSeek.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
             var progress = max
@@ -121,7 +121,7 @@ class PlayerFragment : Fragment() {
                     return
                 }
                 this.progress = progress
-                fragmentPlayerBinding.playbackSpeedText.text = progressToText(seekBar, progress)
+                fragmentPlayerBinding.playbackSpeedText.text = valueToText(progressToSpeed(seekBar, progress))
                 if (!dragging) {
                     setPlaybackSpeed(seekBar)
                 }
@@ -148,16 +148,14 @@ class PlayerFragment : Fragment() {
             }
 
             fun progressToSpeed(seekBar: SeekBar?, progress: Int): Float {
-                val value = seekBar!!.max - progress + 1
-                return 1f / value.toFloat()
+                return progress.toFloat() / seekBar!!.max.toFloat() * 0.99f + 0.01f
             }
 
-            fun progressToText(seekBar: SeekBar?, progress: Int): String {
-                val value = seekBar!!.max - progress + 1
-                return if (value == 1) {
-                    "1x"
+            fun valueToText(value: Float): String {
+                return if (value == 1f) {
+                    "1"
                 } else {
-                    "1/${value}x"
+                    "%.2f".format(value)
                 }
             }
 
