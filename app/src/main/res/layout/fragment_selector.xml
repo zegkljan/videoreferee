@@ -64,15 +64,15 @@
             android:layout_margin="32dp"
             >
             <TextView
-                android:id="@+id/resolution_spinner_label"
+                android:id="@+id/fps_spinner_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/camera_settings_resolution"/>
+                android:text="@string/camera_settings_fps"/>
             <Spinner
-                android:id="@+id/resolution_spinner"
+                android:id="@+id/fps_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/resolution_spinner_label"
+                android:layout_below="@id/fps_spinner_label"
                 android:layout_marginTop="5dip"
                 />
         </RelativeLayout>
@@ -83,15 +83,15 @@
             android:layout_margin="32dp"
             >
             <TextView
-                android:id="@+id/fps_spinner_label"
+                android:id="@+id/resolution_spinner_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/camera_settings_fps"/>
+                android:text="@string/camera_settings_resolution"/>
             <Spinner
-                android:id="@+id/fps_spinner"
+                android:id="@+id/resolution_spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/fps_spinner_label"
+                android:layout_below="@id/resolution_spinner_label"
                 android:layout_marginTop="5dip"
                 />
         </RelativeLayout>
