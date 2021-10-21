@@ -1,5 +1,6 @@
 /*
  * Copyright 2020 The Android Open Source Project
+ * Modifications copyright 2021 Jan Žegklitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +33,13 @@ android {
             keyPassword keystoreProperties['keyPassword']
         }
     }
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "cz.zegkljan.videoreferee"
         versionCode 2
         versionName "0.2.0"
         minSdkVersion 24
-        targetSdkVersion 30
+        targetSdkVersion 31
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
 
         setProperty("archivesBaseName", "VideoReferee")

@@ -1,5 +1,6 @@
 /*
  * Copyright 2020 The Android Open Source Project
+ * Modifications copyright 2021 Jan Žegklitz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +27,12 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var activityCameraBinding: ActivityCameraBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
         activityCameraBinding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(activityCameraBinding.root)
     }
 
     override fun onResume() {
-        // Log.d(TAG, "onResume")
         super.onResume()
         // Before setting full screen flags, we must wait a bit to let UI settle; otherwise, we may
         // be trying to set app to immersive mode before it's ready and the flags do not stick
@@ -43,7 +42,6 @@ class CameraActivity : AppCompatActivity() {
     }
 
     companion object {
-        private val TAG = CameraActivity::class.java.simpleName
         /** Combination of all flags required to put activity into immersive mode */
         const val FLAGS_FULLSCREEN =
                 View.SYSTEM_UI_FLAG_LOW_PROFILE or
@@ -52,9 +50,6 @@ class CameraActivity : AppCompatActivity() {
                         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
                         View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
 
-        /** Milliseconds used for UI animations */
-        const val ANIMATION_FAST_MILLIS = 50L
-        const val ANIMATION_SLOW_MILLIS = 100L
         private const val IMMERSIVE_FLAG_TIMEOUT = 500L
     }
 }

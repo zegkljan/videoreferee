@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright 2020 The Android Open Source Project
+  ~ Modifications copyright 2021 Jan Žegklitz
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -35,7 +36,8 @@
         <activity
             android:name="cz.zegkljan.videoreferee.CameraActivity"
             android:clearTaskOnLaunch="true"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:exported="true">
 
             <!-- Main app intent filter -->
             <intent-filter>
