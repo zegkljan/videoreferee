@@ -24,6 +24,15 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="no_dont_ask">No and don\'t ask</string>
+    <string name="camera_settings">Camera settings</string>
+    <string name="camera_settings_camera">Camera</string>
+    <string name="camera_settings_resolution">Resolution</string>
+    <string name="camera_settings_fps">Frame rate (FPS)</string>
+    <string name="camera_front">Front</string>
+    <string name="camera_back">Back</string>
+    <string name="camera_external">External</string>
+    <string name="camera_unknown" translatable="false">\?\?\?</string>
+    <string name="camera_settings_continue">Continue</string>
     <string name="capture">Capture</string>
     <string name="play_pause">Play/Pause</string>
     <string name="done">Done</string>
