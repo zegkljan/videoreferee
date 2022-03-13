@@ -33,13 +33,13 @@ android {
             keyPassword keystoreProperties['keyPassword']
         }
     }
-    compileSdkVersion 31
+    compileSdkVersion 32
     defaultConfig {
         applicationId "cz.zegkljan.videoreferee"
         versionCode 3
         versionName "0.3.0"
         minSdkVersion 24
-        targetSdkVersion 31
+        targetSdkVersion 32
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
 
         setProperty("archivesBaseName", "VideoReferee")

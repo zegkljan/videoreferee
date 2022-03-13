@@ -23,7 +23,7 @@
     </string>
     <string name="yes">Ano</string>
     <string name="no">Ne</string>
-    <string name="no_dont_ask">Ne a neptat se znovu</string>
+    <string name="no_dont_ask">Ne a neptat se znovu pro tuto verzi</string>
     <string name="camera_settings">Nastavení kamery</string>
     <string name="camera_settings_camera">Kamera</string>
     <string name="camera_settings_resolution">Rozlišení</string>

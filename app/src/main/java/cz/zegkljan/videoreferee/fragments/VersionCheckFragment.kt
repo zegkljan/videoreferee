@@ -43,7 +43,7 @@ import org.json.JSONArray
 import org.json.JSONTokener
 
 /**
- * This [Fragment] requests permissions and, once granted, it will navigate to the next fragment
+ * This [Fragment] checks for the availability of a newer version and offers a download if there is one.
  */
 class VersionCheckFragment : Fragment() {
     private lateinit var launcher: ActivityResultLauncher<Intent>
@@ -65,12 +65,12 @@ class VersionCheckFragment : Fragment() {
         val info = activity.packageManager.getPackageInfo(activity.packageName, PackageManager.GET_ACTIVITIES)
 
         val prefs = activity.getPreferences(Context.MODE_PRIVATE)
-        val lastVersion = prefs.getString(LAST_VERSION_KEY, null)
-        if (info.versionName.equals(lastVersion)) {
-            leave()
-            return null
+        val lastVersionStr = prefs.getString(LAST_IGNORED_VERSION_KEY, null)
+        val lastIgnoredVersion: Version? = if (lastVersionStr == null) {
+            null
+        } else {
+            Version.fromVersionString(lastVersionStr)
         }
-
         val version = Version.fromVersionString(info.versionName)
 
         lifecycleScope.launch {
@@ -80,7 +80,7 @@ class VersionCheckFragment : Fragment() {
                 return@launch
             }
 
-            if (version < latest.version) {
+            if (version < latest.version && (lastIgnoredVersion == null || latest.version > lastIgnoredVersion)) {
                 AlertDialog.Builder(requireActivity()).apply {
                     setTitle(R.string.new_version_title)
                     setMessage(getString(R.string.new_version_message, latest.version, version))
@@ -93,7 +93,7 @@ class VersionCheckFragment : Fragment() {
                     }
                     setNegativeButton(R.string.no_dont_ask) { _, _ ->
                         prefs.edit {
-                            putString(LAST_VERSION_KEY, info.versionName)
+                            putString(LAST_IGNORED_VERSION_KEY, latest.version.toString())
                             apply()
                         }
                         leave()
@@ -135,6 +135,11 @@ class VersionCheckFragment : Fragment() {
             val jsonRelease = jsonReleases.getJSONObject(i)
             val ver = jsonRelease.getString("tag_name").removePrefix("v")
             val url = jsonRelease.getString("html_url")
+            val isDraft = jsonRelease.getBoolean("draft")
+            val isPrerelease = jsonRelease.getBoolean("prerelease")
+            if (isDraft || isPrerelease) {
+                continue
+            }
             releases.add(Release(ver, url))
         }
         releases.sort()
@@ -143,7 +148,11 @@ class VersionCheckFragment : Fragment() {
 
     companion object {
         const val GIT_RELEASES = "https://api.github.com/repos/zegkljan/videoreferee/releases"
-        const val LAST_VERSION_KEY = "last-version"
+        /**
+         * A preferences key under which the last version that should be ignored when checking for new versions is stored.
+         * Only versions newer than the one stored under this key is offered to the user.
+         */
+        const val LAST_IGNORED_VERSION_KEY = "last-ignored-version"
 
         data class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Version> {
             override fun compareTo(other: Version): Int {
