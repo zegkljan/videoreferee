@@ -26,6 +26,7 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.Log
 import android.util.Range
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -36,14 +37,14 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentCameraBinding
+import cz.zegkljan.videoreferee.utils.MediaItem
 import cz.zegkljan.videoreferee.utils.OrientationLiveData
+import cz.zegkljan.videoreferee.utils.createDummyFile
+import cz.zegkljan.videoreferee.utils.prepareMediaItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -74,9 +75,6 @@ class NormalSpeedCameraFragment : Fragment() {
         cameraManager.getCameraCharacteristics(args.cameraId)
     }
 
-    /** File where the recording will be saved */
-    private val outputFile: File by lazy { createFile(requireContext(), "mp4") }
-
     /**
      * Setup a persistent [Surface] for the recorder so we can use it as an output target for the
      * camera session without preparing the recorder
@@ -90,6 +88,7 @@ class NormalSpeedCameraFragment : Fragment() {
         // Required to allocate an appropriately sized buffer before passing the Surface as the
         //  output target to the high speed capture session
         createRecorder(surface).apply {
+            setOutputFile(createDummyFile(requireContext()).absolutePath)
             prepare()
             release()
         }
@@ -111,6 +110,8 @@ class NormalSpeedCameraFragment : Fragment() {
 
     /** The [CameraDevice] that will be opened in this fragment */
     private lateinit var camera: CameraDevice
+
+    private var mediaItem: MediaItem? = null
 
     /** Request used for preview only in the [CameraCaptureSession] */
     private val previewRequest: CaptureRequest by lazy {
@@ -185,7 +186,6 @@ class NormalSpeedCameraFragment : Fragment() {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setVideoSource(MediaRecorder.VideoSource.SURFACE)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setOutputFile(outputFile.absolutePath)
             setVideoEncodingBitRate(RECORDER_VIDEO_BITRATE)
             setVideoFrameRate(args.fps)
             setVideoSize(args.width, args.height)
@@ -234,6 +234,12 @@ class NormalSpeedCameraFragment : Fragment() {
                     recorder.apply {
                         // Sets output orientation based on current sensor value at start time
                         relativeOrientation.value?.let { setOrientationHint(it) }
+                        // Sets the output file
+                        val ctx = requireContext()
+                        mediaItem = prepareMediaItem(ctx, "mp4")
+                        Log.d(TAG, mediaItem.toString())
+                        setOutputFile(mediaItem!!.getWriteFileDescriptor(ctx))
+
                         prepare()
                         start()
                     }
@@ -254,6 +260,10 @@ class NormalSpeedCameraFragment : Fragment() {
                     // Log.d(TAG, "Recording stopped. Output file: $outputFile")
                     recorder.stop()
 
+                    // Finalize output file
+                    mediaItem!!.closeFileDescriptor()
+                    mediaItem!!.finalize(requireContext())
+
                     // Unlocks screen rotation after recording finished
                     requireActivity().requestedOrientation =
                         ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -262,7 +272,7 @@ class NormalSpeedCameraFragment : Fragment() {
                     requireActivity().runOnUiThread {
                         navController.navigate(
                             NormalSpeedCameraFragmentDirections.actionNormalSpeedCameraToPlayer(
-                                outputFile.absolutePath,
+                                mediaItem!!.getUriString(),
                                 args.cameraId,
                                 args.width,
                                 args.height,
@@ -371,12 +381,5 @@ class NormalSpeedCameraFragment : Fragment() {
 
         private const val RECORDER_VIDEO_BITRATE: Int = 10000000
         private const val MIN_REQUIRED_RECORDING_TIME_MILLIS: Long = 1000L
-
-        /** Creates a [File] named with the current date and time */
-        private fun createFile(context: Context, extension: String): File {
-            // Log.d(TAG, "createFile")
-            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
-            return File(context.filesDir, "VID_${sdf.format(Date())}.$extension")
-        }
     }
 }

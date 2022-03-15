@@ -134,7 +134,7 @@
         android:label="Camera" >
 
         <argument
-            android:name="filename"
+            android:name="fileuri"
             app:argType="string"
             app:nullable="false" />
 

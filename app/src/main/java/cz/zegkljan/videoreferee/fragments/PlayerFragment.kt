@@ -34,7 +34,6 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentPlayerBinding
-import java.io.File
 import kotlin.math.roundToInt
 
 class PlayerFragment : Fragment() {
@@ -99,7 +98,7 @@ class PlayerFragment : Fragment() {
             .build()
             .also { exoPlayer ->
                 fragmentPlayerBinding.playerView.player = exoPlayer
-                val mediaItem = MediaItem.fromUri(Uri.fromFile(File(args.filename)))
+                val mediaItem = MediaItem.fromUri(Uri.parse(args.fileuri))
                 exoPlayer.setMediaItem(mediaItem)
                 exoPlayer.playWhenReady = plWhenReady
                 exoPlayer.seekTo(currentWindow, playbackPosition)
@@ -168,10 +167,12 @@ class PlayerFragment : Fragment() {
 
         // navigation out
         fragmentPlayerBinding.doneButton.setOnClickListener {
+            /*
             val file = File(args.filename)
             if (!file.delete()) {
                 // Log.e(TAG, "Failed to delete file $file")
             }
+            */
             val navDirections: NavDirections = if (args.isHighSpeed) {
                 PlayerFragmentDirections.actionPlayerToHighSpeedCamera(args.cameraId, args.width, args.height, args.fps)
             } else {

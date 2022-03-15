@@ -38,14 +38,14 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentCameraBinding
+import cz.zegkljan.videoreferee.utils.MediaItem
 import cz.zegkljan.videoreferee.utils.OrientationLiveData
+import cz.zegkljan.videoreferee.utils.createDummyFile
+import cz.zegkljan.videoreferee.utils.prepareMediaItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -76,9 +76,6 @@ class HighSpeedCameraFragment : Fragment() {
         cameraManager.getCameraCharacteristics(args.cameraId)
     }
 
-    /** File where the recording will be saved */
-    private val outputFile: File by lazy { createFile(requireContext(), "mp4") }
-
     /**
      * Setup a persistent [Surface] for the recorder so we can use it as an output target for the
      * camera session without preparing the recorder
@@ -92,6 +89,7 @@ class HighSpeedCameraFragment : Fragment() {
         // Required to allocate an appropriately sized buffer before passing the Surface as the
         //  output target to the high speed capture session
         createRecorder(surface).apply {
+            setOutputFile(createDummyFile(requireContext()).absolutePath)
             prepare()
             release()
         }
@@ -113,6 +111,8 @@ class HighSpeedCameraFragment : Fragment() {
 
     /** The [CameraDevice] that will be opened in this fragment */
     private lateinit var camera: CameraDevice
+
+    private var mediaItem: MediaItem? = null
 
     /** Requests used for preview only in the [CameraConstrainedHighSpeedCaptureSession] */
     private val previewRequestList: List<CaptureRequest> by lazy {
@@ -168,10 +168,11 @@ class HighSpeedCameraFragment : Fragment() {
         fragmentCameraBinding.viewFinder.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
             override fun surfaceChanged(
-                    holder: SurfaceHolder,
-                    format: Int,
-                    width: Int,
-                    height: Int) = Unit
+                holder: SurfaceHolder,
+                format: Int,
+                width: Int,
+                height: Int
+            ) = Unit
 
             override fun surfaceCreated(holder: SurfaceHolder) {
                 // Log.d(TAG, "onViewCreated/surfaceCreated")
@@ -197,7 +198,6 @@ class HighSpeedCameraFragment : Fragment() {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setVideoSource(MediaRecorder.VideoSource.SURFACE)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setOutputFile(outputFile.absolutePath)
             setVideoEncodingBitRate(RECORDER_VIDEO_BITRATE)
             setVideoFrameRate(args.fps)
             setVideoSize(args.width, args.height)
@@ -227,15 +227,17 @@ class HighSpeedCameraFragment : Fragment() {
 
         // Ensures the requested size and FPS are compatible with this camera
         val fpsRange = Range(args.fps, args.fps)
-        assert(true == characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                ?.getHighSpeedVideoFpsRangesFor(Size(args.width, args.height))?.contains(fpsRange))
+        assert(
+            true == characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                ?.getHighSpeedVideoFpsRangesFor(Size(args.width, args.height))?.contains(fpsRange)
+        )
 
         // Sends the capture request as frequently as possible until the session is torn down or
         // session.stopRepeating() is called
         session.setRepeatingBurst(previewRequestList, null, cameraHandler)
 
         // Listen to the capture button
-        fragmentCameraBinding.captureButton.setOnCheckedChangeListener { view, isChecked ->
+        fragmentCameraBinding.captureButton.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 lifecycleScope.launch(Dispatchers.IO) {
 
@@ -251,6 +253,12 @@ class HighSpeedCameraFragment : Fragment() {
                     recorder.apply {
                         // Sets output orientation based on current sensor value at start time
                         relativeOrientation.value?.let { setOrientationHint(it) }
+
+                        // Sets the output file
+                        val ctx = requireContext()
+                        mediaItem = prepareMediaItem(ctx, "mp4")
+                        setOutputFile(mediaItem!!.getWriteFileDescriptor(ctx))
+
                         prepare()
                         start()
                     }
@@ -271,6 +279,10 @@ class HighSpeedCameraFragment : Fragment() {
                     // Log.d(TAG, "Recording stopped. Output file: $outputFile")
                     recorder.stop()
 
+                    // Finalize output file
+                    mediaItem!!.closeFileDescriptor()
+                    mediaItem!!.finalize(requireContext())
+
                     // Unlocks screen rotation after recording finished
                     requireActivity().requestedOrientation =
                         ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
@@ -279,7 +291,7 @@ class HighSpeedCameraFragment : Fragment() {
                     requireActivity().runOnUiThread {
                         navController.navigate(
                             HighSpeedCameraFragmentDirections.actionHighSpeedCameraToPlayer(
-                                outputFile.absolutePath,
+                                mediaItem!!.getUriString(),
                                 args.cameraId,
                                 args.width,
                                 args.height,
@@ -296,9 +308,9 @@ class HighSpeedCameraFragment : Fragment() {
     /** Opens the camera and returns the opened device (as the result of the suspend coroutine) */
     @SuppressLint("MissingPermission")
     private suspend fun openCamera(
-            manager: CameraManager,
-            cameraId: String,
-            handler: Handler? = null
+        manager: CameraManager,
+        cameraId: String,
+        handler: Handler? = null
     ): CameraDevice = suspendCancellableCoroutine { cont ->
         // Log.d(TAG, "openCamera")
         manager.openCamera(cameraId, object : CameraDevice.StateCallback() {
@@ -315,7 +327,7 @@ class HighSpeedCameraFragment : Fragment() {
 
             override fun onError(device: CameraDevice, error: Int) {
                 // Log.d(TAG, "openCamera/onError")
-                val msg = when(error) {
+                val msg = when (error) {
                     ERROR_CAMERA_DEVICE -> "Fatal (device)"
                     ERROR_CAMERA_DISABLED -> "Device policy"
                     ERROR_CAMERA_IN_USE -> "Camera in use"
@@ -335,28 +347,29 @@ class HighSpeedCameraFragment : Fragment() {
      * suspend coroutine)
      */
     private suspend fun createCaptureSession(
-            device: CameraDevice,
-            targets: List<Surface>,
-            handler: Handler? = null
+        device: CameraDevice,
+        targets: List<Surface>,
+        handler: Handler? = null
     ): CameraConstrainedHighSpeedCaptureSession = suspendCoroutine { cont ->
         // Log.d(TAG, "createCaptureSession")
         // Creates a capture session using the predefined targets, and defines a session state
         // callback which resumes the coroutine once the session is configured
         device.createConstrainedHighSpeedCaptureSession(
-                targets, object: CameraCaptureSession.StateCallback() {
+            targets, object : CameraCaptureSession.StateCallback() {
 
-            override fun onConfigured(session: CameraCaptureSession) {
-                // Log.d(TAG, "createCaptureSession/onConfigured")
-                cont.resume(session as CameraConstrainedHighSpeedCaptureSession)
-            }
+                override fun onConfigured(session: CameraCaptureSession) {
+                    // Log.d(TAG, "createCaptureSession/onConfigured")
+                    cont.resume(session as CameraConstrainedHighSpeedCaptureSession)
+                }
 
-            override fun onConfigureFailed(session: CameraCaptureSession) {
-                // Log.d(TAG, "createCaptureSession/onConfigureFailed")
-                val exc = RuntimeException("Camera ${device.id} session configuration failed")
-                // Log.e(TAG, exc.message, exc)
-                cont.resumeWithException(exc)
-            }
-        }, handler)
+                override fun onConfigureFailed(session: CameraCaptureSession) {
+                    // Log.d(TAG, "createCaptureSession/onConfigureFailed")
+                    val exc = RuntimeException("Camera ${device.id} session configuration failed")
+                    // Log.e(TAG, exc.message, exc)
+                    cont.resumeWithException(exc)
+                }
+            }, handler
+        )
     }
 
     override fun onStop() {
@@ -394,12 +407,5 @@ class HighSpeedCameraFragment : Fragment() {
          * [StreamConfigurationMap.getHighSpeedVideoFpsRanges]
          */
         private const val FPS_PREVIEW_ONLY: Int = 30
-
-        /** Creates a [File] named with the current date and time */
-        private fun createFile(context: Context, extension: String): File {
-            // Log.d(TAG, "createFile")
-            val sdf = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
-            return File(context.filesDir, "VID_${sdf.format(Date())}.$extension")
-        }
     }
 }
