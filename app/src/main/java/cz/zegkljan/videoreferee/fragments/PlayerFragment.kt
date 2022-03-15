@@ -34,6 +34,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentPlayerBinding
+import cz.zegkljan.videoreferee.utils.Medium
 import kotlin.math.roundToInt
 
 class PlayerFragment : Fragment() {
@@ -167,12 +168,18 @@ class PlayerFragment : Fragment() {
 
         // navigation out
         fragmentPlayerBinding.doneButton.setOnClickListener {
-            /*
-            val file = File(args.filename)
-            if (!file.delete()) {
-                // Log.e(TAG, "Failed to delete file $file")
+            val navDirections: NavDirections = if (args.isHighSpeed) {
+                PlayerFragmentDirections.actionPlayerToHighSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+            } else {
+                PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(args.cameraId, args.width, args.height, args.fps)
             }
-            */
+            navController.navigate(navDirections)
+        }
+        fragmentPlayerBinding.deleteButton.setOnClickListener {
+            val medium = Medium.fromUri(Uri.parse(args.fileuri))
+            if (!medium.remove(requireContext())) {
+                // Log.e(TAG, "Failed to delete file $medium")
+            }
             val navDirections: NavDirections = if (args.isHighSpeed) {
                 PlayerFragmentDirections.actionPlayerToHighSpeedCamera(args.cameraId, args.width, args.height, args.fps)
             } else {

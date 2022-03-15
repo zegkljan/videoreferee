@@ -37,5 +37,6 @@
     <string name="capture">Capture</string>
     <string name="play_pause">Play/Pause</string>
     <string name="done">Done</string>
+    <string name="delete">Done and delete</string>
     <string name="rewind">Rewind to start</string>
 </resources>

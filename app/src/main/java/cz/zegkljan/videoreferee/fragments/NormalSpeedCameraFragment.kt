@@ -37,10 +37,9 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentCameraBinding
-import cz.zegkljan.videoreferee.utils.MediaItem
+import cz.zegkljan.videoreferee.utils.Medium
 import cz.zegkljan.videoreferee.utils.OrientationLiveData
 import cz.zegkljan.videoreferee.utils.createDummyFile
-import cz.zegkljan.videoreferee.utils.prepareMediaItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -111,7 +110,7 @@ class NormalSpeedCameraFragment : Fragment() {
     /** The [CameraDevice] that will be opened in this fragment */
     private lateinit var camera: CameraDevice
 
-    private var mediaItem: MediaItem? = null
+    private var medium: Medium? = null
 
     /** Request used for preview only in the [CameraCaptureSession] */
     private val previewRequest: CaptureRequest by lazy {
@@ -236,9 +235,9 @@ class NormalSpeedCameraFragment : Fragment() {
                         relativeOrientation.value?.let { setOrientationHint(it) }
                         // Sets the output file
                         val ctx = requireContext()
-                        mediaItem = prepareMediaItem(ctx, "mp4")
-                        Log.d(TAG, mediaItem.toString())
-                        setOutputFile(mediaItem!!.getWriteFileDescriptor(ctx))
+                        medium = Medium.create(ctx, "mp4")
+                        Log.d(TAG, medium.toString())
+                        setOutputFile(medium!!.getWriteFileDescriptor(ctx))
 
                         prepare()
                         start()
@@ -261,8 +260,8 @@ class NormalSpeedCameraFragment : Fragment() {
                     recorder.stop()
 
                     // Finalize output file
-                    mediaItem!!.closeFileDescriptor()
-                    mediaItem!!.finalize(requireContext())
+                    medium!!.closeFileDescriptor()
+                    medium!!.finalize(requireContext())
 
                     // Unlocks screen rotation after recording finished
                     requireActivity().requestedOrientation =
@@ -272,7 +271,7 @@ class NormalSpeedCameraFragment : Fragment() {
                     requireActivity().runOnUiThread {
                         navController.navigate(
                             NormalSpeedCameraFragmentDirections.actionNormalSpeedCameraToPlayer(
-                                mediaItem!!.getUriString(),
+                                medium!!.getUriString(),
                                 args.cameraId,
                                 args.width,
                                 args.height,

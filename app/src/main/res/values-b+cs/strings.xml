@@ -35,5 +35,6 @@
     <string name="capture">Záznam</string>
     <string name="play_pause">Přehrát/Zastavit</string>
     <string name="done">Hotovo</string>
+    <string name="delete">Hotova a smazat</string>
     <string name="rewind">Skočit na začátek</string>
 </resources>
