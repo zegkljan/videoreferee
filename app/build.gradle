@@ -36,8 +36,8 @@ android {
     compileSdkVersion 31
     defaultConfig {
         applicationId "cz.zegkljan.videoreferee"
-        versionCode 5
-        versionName "0.5.0-rc.1"
+        versionCode 6
+        versionName "0.5.0-rc.2"
         minSdkVersion 24
         targetSdkVersion 31
         testInstrumentationRunner "android.test.InstrumentationTestRunner"

@@ -36,7 +36,7 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-val DATE_FORMAT = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
+val DATE_FORMAT = SimpleDateFormat("yyyy-MM-dd_HH-mm-ss_SSS", Locale.US)
 
 private const val TAG = "Files"
 
