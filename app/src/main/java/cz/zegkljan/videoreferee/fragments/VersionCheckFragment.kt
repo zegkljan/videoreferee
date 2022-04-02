@@ -32,6 +32,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import cz.zegkljan.videoreferee.R
+import cz.zegkljan.videoreferee.utils.LAST_IGNORED_VERSION_KEY
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*
@@ -39,6 +40,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.launch
+import net.swiftzer.semver.SemVer
 import org.json.JSONArray
 import org.json.JSONTokener
 
@@ -66,12 +68,12 @@ class VersionCheckFragment : Fragment() {
 
         val prefs = activity.getPreferences(Context.MODE_PRIVATE)
         val lastVersionStr = prefs.getString(LAST_IGNORED_VERSION_KEY, null)
-        val lastIgnoredVersion: Version? = if (lastVersionStr == null) {
+        val lastIgnoredVersion: SemVer? = if (lastVersionStr == null) {
             null
         } else {
-            Version.fromVersionString(lastVersionStr)
+            SemVer.parse(lastVersionStr)
         }
-        val version = Version.fromVersionString(info.versionName)
+        val version = SemVer.parse(info.versionName)
 
         lifecycleScope.launch {
             val latest = getLatestRelease()
@@ -148,63 +150,9 @@ class VersionCheckFragment : Fragment() {
 
     companion object {
         const val GIT_RELEASES = "https://api.github.com/repos/zegkljan/videoreferee/releases"
-        /**
-         * A preferences key under which the last version that should be ignored when checking for new versions is stored.
-         * Only versions newer than the one stored under this key is offered to the user.
-         */
-        const val LAST_IGNORED_VERSION_KEY = "last-ignored-version"
 
-        data class Version(val major: Int, val minor: Int, val patch: Int) : Comparable<Version> {
-            override fun compareTo(other: Version): Int {
-                if (major < other.major) {
-                    return -1
-                } else if (major > other.major) {
-                    return 1
-                }
-                if (minor < other.minor) {
-                    return -1
-                } else if (minor > other.minor) {
-                    return 1
-                }
-                if (patch < other.patch) {
-                    return -1
-                } else if (patch > other.patch) {
-                    return 1
-                }
-                return 0
-            }
-
-            override fun toString(): String {
-                return "$major.$minor.$patch"
-            }
-
-            companion object {
-                fun fromVersionString(versionString: String): Version {
-                    val parts = versionString.split(".")
-                    val major: Int
-                    if (parts.isNotEmpty()) {
-                        major = parts[0].toInt()
-                    } else {
-                        throw IllegalArgumentException("empty version")
-                    }
-                    val minor: Int = if (parts.size >= 2) {
-                        parts[1].toInt()
-                    } else {
-                        0
-                    }
-                    val patch: Int = if (parts.size >= 3) {
-                        parts[2].toInt()
-                    } else {
-                        0
-                    }
-
-                    return Version(major, minor, patch)
-                }
-            }
-        }
-
-        data class Release(val version: Version, val url: String) : Comparable<Release> {
-            constructor(versionString: String, url: String) : this(Version.fromVersionString(versionString), url)
+        data class Release(val version: SemVer, val url: String) : Comparable<Release> {
+            constructor(versionString: String, url: String) : this(SemVer.parse(versionString), url)
 
             override fun compareTo(other: Release): Int {
                 return version.compareTo(other.version)

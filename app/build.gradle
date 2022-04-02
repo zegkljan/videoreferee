@@ -110,6 +110,9 @@ dependencies {
     implementation "io.ktor:ktor-client-core:$ktor_version"
     implementation "io.ktor:ktor-client-android:$ktor_version"
 
+    // Semver
+    implementation "net.swiftzer.semver:semver:1.1.2"
+
     // Unit testing
     testImplementation 'androidx.test.ext:junit:1.1.3'
     testImplementation 'androidx.test:rules:1.4.0'
