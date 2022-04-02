@@ -36,8 +36,9 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
+val DATE_FORMAT = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
+
 private const val TAG = "Files"
-private val SDF = SimpleDateFormat("yyyy_MM_dd_HH_mm_ss_SSS", Locale.US)
 
 /** Creates a [File] in the app-specific directory */
 fun createDummyFile(context: Context): File {
@@ -53,14 +54,14 @@ abstract class Medium {
 
     companion object {
         /** Creates a [Medium] named with the current date and time */
-        fun create(context: Context, extension: String): Medium {
+        fun create(context: Context, filename: String): Medium {
             // Log.d(TAG, "createFile")
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val resolver = context.contentResolver
                 val videoCollection = MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
                 val videoDetails = ContentValues().apply {
-                    put(MediaStore.Video.Media.DISPLAY_NAME, "VID_${SDF.format(Date())}.$extension")
+                    put(MediaStore.Video.Media.DISPLAY_NAME, filename)
                     put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/VideoReferee/")
                     put(MediaStore.Video.Media.IS_PENDING, 1)
                 }
@@ -72,7 +73,7 @@ abstract class Medium {
                 val externalFilesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM)
                 val videoRefereeDir = File(externalFilesDir, "VideoReferee")
                 videoRefereeDir.mkdirs()
-                val file = File(videoRefereeDir, "VID_${SDF.format(Date())}.$extension")
+                val file = File(videoRefereeDir, filename)
                 return FileMedium(file)
             }
         }

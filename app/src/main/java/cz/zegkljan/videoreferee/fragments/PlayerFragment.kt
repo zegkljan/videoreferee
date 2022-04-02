@@ -17,8 +17,10 @@
 package cz.zegkljan.videoreferee.fragments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,6 +36,8 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentPlayerBinding
+import cz.zegkljan.videoreferee.utils.BOUT_COUNTER_KEY
+import cz.zegkljan.videoreferee.utils.EXCHANGE_COUNTER_KEY
 import cz.zegkljan.videoreferee.utils.Medium
 import kotlin.math.roundToInt
 
@@ -56,7 +60,7 @@ class PlayerFragment : Fragment() {
 
     /**  Player */
     private var player: SimpleExoPlayer? = null
-    private val playbackStateListener: Player.Listener = object: Player.Listener {
+    private val playbackStateListener: Player.Listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
             val stateString: String = when (playbackState) {
                 ExoPlayer.STATE_IDLE -> "ExoPlayer.STATE_IDLE"
@@ -110,8 +114,10 @@ class PlayerFragment : Fragment() {
         // control listeners
         val max = fragmentPlayerBinding.playbackSpeedSeek.max
         fragmentPlayerBinding.playbackSpeedText.text = "1"
-        fragmentPlayerBinding.playbackSpeedSeek.progress = fragmentPlayerBinding.playbackSpeedSeek.max
-        fragmentPlayerBinding.playbackSpeedSeek.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+        fragmentPlayerBinding.playbackSpeedSeek.progress =
+            fragmentPlayerBinding.playbackSpeedSeek.max
+        fragmentPlayerBinding.playbackSpeedSeek.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
             var progress = max
             var wasPlaying = false
             var dragging = false
@@ -121,7 +127,8 @@ class PlayerFragment : Fragment() {
                     return
                 }
                 this.progress = progress
-                fragmentPlayerBinding.playbackSpeedText.text = valueToText(progressToSpeed(seekBar, progress))
+                fragmentPlayerBinding.playbackSpeedText.text =
+                    valueToText(progressToSpeed(seekBar, progress))
                 if (!dragging) {
                     setPlaybackSpeed(seekBar)
                 }
@@ -136,6 +143,7 @@ class PlayerFragment : Fragment() {
                 wasPlaying = p.isPlaying
                 p.pause()
             }
+
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 if (player == null) {
                     return
@@ -168,22 +176,52 @@ class PlayerFragment : Fragment() {
 
         // navigation out
         fragmentPlayerBinding.doneButton.setOnClickListener {
+            val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
+            prefs.edit().putInt(EXCHANGE_COUNTER_KEY, prefs.getInt(EXCHANGE_COUNTER_KEY, 0) + 1)
+                .apply()
+            Log.d(TAG, "keep: bout counter: ${prefs.getInt(BOUT_COUNTER_KEY, 0)}")
+            Log.d(TAG, "keep: exchange counter: ${prefs.getInt(EXCHANGE_COUNTER_KEY, 0)}")
             val navDirections: NavDirections = if (args.isHighSpeed) {
-                PlayerFragmentDirections.actionPlayerToHighSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+                PlayerFragmentDirections.actionPlayerToHighSpeedCamera(
+                    args.cameraId,
+                    args.width,
+                    args.height,
+                    args.fps
+                )
             } else {
-                PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+                PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(
+                    args.cameraId,
+                    args.width,
+                    args.height,
+                    args.fps
+                )
             }
             navController.navigate(navDirections)
         }
         fragmentPlayerBinding.deleteButton.setOnClickListener {
+            val prefs = requireActivity().getPreferences(Context.MODE_PRIVATE)
             val medium = Medium.fromUri(Uri.parse(args.fileuri))
             if (!medium.remove(requireContext())) {
                 // Log.e(TAG, "Failed to delete file $medium")
             }
+            prefs.edit().putInt(EXCHANGE_COUNTER_KEY, prefs.getInt(EXCHANGE_COUNTER_KEY, 0) + 1)
+                .apply()
+            Log.d(TAG, "delete: bout counter: ${prefs.getInt(BOUT_COUNTER_KEY, 0)}")
+            Log.d(TAG, "delete: exchange counter: ${prefs.getInt(EXCHANGE_COUNTER_KEY, 0)}")
             val navDirections: NavDirections = if (args.isHighSpeed) {
-                PlayerFragmentDirections.actionPlayerToHighSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+                PlayerFragmentDirections.actionPlayerToHighSpeedCamera(
+                    args.cameraId,
+                    args.width,
+                    args.height,
+                    args.fps
+                )
             } else {
-                PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(args.cameraId, args.width, args.height, args.fps)
+                PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(
+                    args.cameraId,
+                    args.width,
+                    args.height,
+                    args.fps
+                )
             }
             navController.navigate(navDirections)
         }

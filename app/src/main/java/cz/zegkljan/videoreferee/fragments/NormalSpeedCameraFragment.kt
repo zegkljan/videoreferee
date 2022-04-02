@@ -19,6 +19,7 @@ package cz.zegkljan.videoreferee.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.hardware.camera2.*
 import android.media.MediaCodec
@@ -37,13 +38,12 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentCameraBinding
-import cz.zegkljan.videoreferee.utils.Medium
-import cz.zegkljan.videoreferee.utils.OrientationLiveData
-import cz.zegkljan.videoreferee.utils.createDummyFile
+import cz.zegkljan.videoreferee.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -140,6 +140,10 @@ class NormalSpeedCameraFragment : Fragment() {
     /** Live data listener for changes in the device orientation relative to the camera */
     private lateinit var relativeOrientation: OrientationLiveData
 
+    private val prefs: SharedPreferences by lazy {
+        requireActivity().getPreferences(Context.MODE_PRIVATE)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -156,10 +160,11 @@ class NormalSpeedCameraFragment : Fragment() {
         fragmentCameraBinding.viewFinder.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceDestroyed(holder: SurfaceHolder) = Unit
             override fun surfaceChanged(
-                    holder: SurfaceHolder,
-                    format: Int,
-                    width: Int,
-                    height: Int) = Unit
+                holder: SurfaceHolder,
+                format: Int,
+                width: Int,
+                height: Int
+            ) = Unit
 
             override fun surfaceCreated(holder: SurfaceHolder) {
                 // Log.d(TAG, "onViewCreated/surfaceCreated")
@@ -235,7 +240,13 @@ class NormalSpeedCameraFragment : Fragment() {
                         relativeOrientation.value?.let { setOrientationHint(it) }
                         // Sets the output file
                         val ctx = requireContext()
-                        medium = Medium.create(ctx, "mp4")
+                        medium = Medium.create(
+                            ctx, "VID_${DATE_FORMAT.format(Date())}_B${
+                                prefs.getInt(
+                                    BOUT_COUNTER_KEY, 0
+                                )
+                            }_E${prefs.getInt(EXCHANGE_COUNTER_KEY, 0)}.mp4"
+                        )
                         Log.d(TAG, medium.toString())
                         setOutputFile(medium!!.getWriteFileDescriptor(ctx))
 
@@ -288,9 +299,9 @@ class NormalSpeedCameraFragment : Fragment() {
     /** Opens the camera and returns the opened device (as the result of the suspend coroutine) */
     @SuppressLint("MissingPermission")
     private suspend fun openCamera(
-            manager: CameraManager,
-            cameraId: String,
-            handler: Handler? = null
+        manager: CameraManager,
+        cameraId: String,
+        handler: Handler? = null
     ): CameraDevice = suspendCancellableCoroutine { cont ->
         // Log.d(TAG, "openCamera")
         manager.openCamera(cameraId, object : CameraDevice.StateCallback() {
@@ -307,7 +318,7 @@ class NormalSpeedCameraFragment : Fragment() {
 
             override fun onError(device: CameraDevice, error: Int) {
                 // Log.d(TAG, "openCamera/onError")
-                val msg = when(error) {
+                val msg = when (error) {
                     ERROR_CAMERA_DEVICE -> "Fatal (device)"
                     ERROR_CAMERA_DISABLED -> "Device policy"
                     ERROR_CAMERA_IN_USE -> "Camera in use"
@@ -327,28 +338,29 @@ class NormalSpeedCameraFragment : Fragment() {
      * suspend coroutine)
      */
     private suspend fun createCaptureSession(
-            device: CameraDevice,
-            targets: List<Surface>,
-            handler: Handler? = null
+        device: CameraDevice,
+        targets: List<Surface>,
+        handler: Handler? = null
     ): CameraCaptureSession = suspendCoroutine { cont ->
         // Log.d(TAG, "createCaptureSession")
         // Creates a capture session using the predefined targets, and defines a session state
         // callback which resumes the coroutine once the session is configured
         device.createCaptureSession(
-                targets, object: CameraCaptureSession.StateCallback() {
+            targets, object : CameraCaptureSession.StateCallback() {
 
-            override fun onConfigured(session: CameraCaptureSession) {
-                // Log.d(TAG, "createCaptureSession/onConfigured")
-                cont.resume(session as CameraCaptureSession)
-            }
+                override fun onConfigured(session: CameraCaptureSession) {
+                    // Log.d(TAG, "createCaptureSession/onConfigured")
+                    cont.resume(session as CameraCaptureSession)
+                }
 
-            override fun onConfigureFailed(session: CameraCaptureSession) {
-                // Log.d(TAG, "createCaptureSession/onConfigureFailed")
-                val exc = RuntimeException("Camera ${device.id} session configuration failed")
-                // Log.e(TAG, exc.message, exc)
-                cont.resumeWithException(exc)
-            }
-        }, handler)
+                override fun onConfigureFailed(session: CameraCaptureSession) {
+                    // Log.d(TAG, "createCaptureSession/onConfigureFailed")
+                    val exc = RuntimeException("Camera ${device.id} session configuration failed")
+                    // Log.e(TAG, exc.message, exc)
+                    cont.resumeWithException(exc)
+                }
+            }, handler
+        )
     }
 
     override fun onStop() {

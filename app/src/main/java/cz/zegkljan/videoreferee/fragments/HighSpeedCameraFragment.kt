@@ -19,6 +19,7 @@ package cz.zegkljan.videoreferee.fragments
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.hardware.camera2.*
 import android.hardware.camera2.params.StreamConfigurationMap
@@ -38,13 +39,12 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.navArgs
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentCameraBinding
-import cz.zegkljan.videoreferee.utils.Medium
-import cz.zegkljan.videoreferee.utils.OrientationLiveData
-import cz.zegkljan.videoreferee.utils.createDummyFile
+import cz.zegkljan.videoreferee.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -151,6 +151,10 @@ class HighSpeedCameraFragment : Fragment() {
     /** Live data listener for changes in the device orientation relative to the camera */
     private lateinit var relativeOrientation: OrientationLiveData
 
+    private val prefs: SharedPreferences by lazy {
+        requireActivity().getPreferences(Context.MODE_PRIVATE)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -255,7 +259,13 @@ class HighSpeedCameraFragment : Fragment() {
 
                         // Sets the output file
                         val ctx = requireContext()
-                        medium = Medium.create(ctx, "mp4")
+                        medium = Medium.create(
+                            ctx, "VID_${DATE_FORMAT.format(Date())}_B${
+                                prefs.getInt(
+                                    BOUT_COUNTER_KEY, 0
+                                )
+                            }_E${prefs.getInt(EXCHANGE_COUNTER_KEY, 0)}.mp4"
+                        )
                         setOutputFile(medium!!.getWriteFileDescriptor(ctx))
 
                         prepare()
