@@ -37,211 +37,223 @@
             android:textAlignment="center"
             android:textSize="12pt" />
 
-        <RelativeLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:id="@+id/camera_spinner_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/camera_settings_camera" />
-
-            <Spinner
-                android:id="@+id/camera_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/camera_spinner_label"
-                android:layout_marginTop="5dip" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:id="@+id/fps_spinner_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/camera_settings_fps" />
-
-            <Spinner
-                android:id="@+id/fps_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/fps_spinner_label"
-                android:layout_marginTop="5dip" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:id="@+id/resolution_spinner_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/camera_settings_resolution" />
-
-            <Spinner
-                android:id="@+id/resolution_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/resolution_spinner_label"
-                android:layout_marginTop="5dip" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="16dp">
-
-            <androidx.appcompat.widget.LinearLayoutCompat
-                android:id="@+id/file_naming_label_wrapper"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/file_naming_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/camera_settings_file_naming" />
-
-                <Button
-                    android:id="@+id/file_naming_info_button"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginHorizontal="4dp"
-                    android:layout_marginVertical="0dp"
-                    android:background="@drawable/ic_outline_info_24"
-                    android:contentDescription="@string/camera_settings_file_naming_help"
-                    android:scaleType="fitCenter" />
-            </androidx.appcompat.widget.LinearLayoutCompat>
+            android:layout_height="wrap_content">
 
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/file_naming_label_wrapper"
-                android:layout_marginStart="8dp"
                 android:gravity="top"
                 android:orientation="vertical">
 
-                <androidx.appcompat.widget.LinearLayoutCompat
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="start">
+                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginTop="16dp">
 
                     <TextView
-                        android:id="@+id/file_naming_bout_counter_label"
+                        android:id="@+id/camera_spinner_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:labelFor="@+id/file_naming_bout_counter"
-                        android:text="@string/camera_settings_file_naming_bout_counter" />
+                        android:text="@string/camera_settings_camera" />
 
-                    <cz.zegkljan.videoreferee.utils.NonRestoringEditText
-                        android:id="@+id/file_naming_bout_counter"
-                        android:layout_width="wrap_content"
+                    <Spinner
+                        android:id="@+id/camera_spinner"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:digits="0123456789"
-                        android:importantForAutofill="no"
-                        android:inputType="numberDecimal" />
+                        android:layout_below="@id/camera_spinner_label"
+                        android:layout_marginTop="5dip" />
+                </RelativeLayout>
 
-                    <Button
-                        android:id="@+id/file_naming_bout_counter_plus_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="38dp"
-                        android:minHeight="38dp"
-                        android:text="+"
-                        tools:ignore="HardcodedText" />
-
-                    <Button
-                        android:id="@+id/file_naming_bout_counter_minus_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="38dp"
-                        android:minHeight="38dp"
-                        android:text="-"
-                        tools:ignore="HardcodedText" />
-
-                    <Button
-                        android:id="@+id/file_naming_bout_counter_reset_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="38dp"
-                        android:minHeight="38dp"
-                        android:text="0"
-                        tools:ignore="HardcodedText" />
-                </androidx.appcompat.widget.LinearLayoutCompat>
-
-                <androidx.appcompat.widget.LinearLayoutCompat
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="start">
+                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginTop="16dp">
 
                     <TextView
-                        android:id="@+id/file_naming_exchange_counter_label"
+                        android:id="@+id/fps_spinner_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:labelFor="@+id/file_naming_exchange_counter"
-                        android:text="@string/camera_settings_file_naming_exchange_counter" />
+                        android:text="@string/camera_settings_fps" />
 
-                    <cz.zegkljan.videoreferee.utils.NonRestoringEditText
-                        android:id="@+id/file_naming_exchange_counter"
-                        android:layout_width="wrap_content"
+                    <Spinner
+                        android:id="@+id/fps_spinner"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
-                        android:digits="0123456789"
-                        android:importantForAutofill="no"
-                        android:inputType="numberDecimal" />
+                        android:layout_below="@id/fps_spinner_label"
+                        android:layout_marginTop="5dip" />
+                </RelativeLayout>
 
-                    <Button
-                        android:id="@+id/file_naming_exchange_counter_plus_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:minWidth="38dp"
-                        android:minHeight="38dp"
-                        android:text="+"
-                        tools:ignore="HardcodedText" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginTop="16dp">
 
-                    <Button
-                        android:id="@+id/file_naming_exchange_counter_minus_button"
+                    <TextView
+                        android:id="@+id/resolution_spinner_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minWidth="38dp"
-                        android:minHeight="38dp"
-                        android:text="-"
-                        tools:ignore="HardcodedText" />
+                        android:text="@string/camera_settings_resolution" />
 
-                    <Button
-                        android:id="@+id/file_naming_exchange_counter_reset_button"
-                        android:layout_width="wrap_content"
+                    <Spinner
+                        android:id="@+id/resolution_spinner"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minWidth="38dp"
-                        android:minHeight="38dp"
-                        android:text="0"
-                        tools:ignore="HardcodedText" />
-                </androidx.appcompat.widget.LinearLayoutCompat>
+                        android:layout_below="@id/resolution_spinner_label"
+                        android:layout_marginTop="5dip" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginTop="16dp">
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:id="@+id/file_naming_label_wrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/file_naming_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/camera_settings_file_naming" />
+
+                        <Button
+                            android:id="@+id/file_naming_info_button"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginHorizontal="4dp"
+                            android:layout_marginVertical="0dp"
+                            android:background="@drawable/ic_outline_info_24"
+                            android:contentDescription="@string/camera_settings_file_naming_help"
+                            android:scaleType="fitCenter" />
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/file_naming_label_wrapper"
+                        android:layout_marginStart="8dp"
+                        android:gravity="top"
+                        android:orientation="vertical">
+
+                        <androidx.appcompat.widget.LinearLayoutCompat
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="start">
+
+                            <TextView
+                                android:id="@+id/file_naming_bout_counter_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:labelFor="@+id/file_naming_bout_counter"
+                                android:text="@string/camera_settings_file_naming_bout_counter" />
+
+                            <cz.zegkljan.videoreferee.utils.NonRestoringEditText
+                                android:id="@+id/file_naming_bout_counter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:digits="0123456789"
+                                android:importantForAutofill="no"
+                                android:inputType="numberDecimal" />
+
+                            <Button
+                                android:id="@+id/file_naming_bout_counter_plus_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="38dp"
+                                android:minHeight="38dp"
+                                android:text="+"
+                                tools:ignore="HardcodedText" />
+
+                            <Button
+                                android:id="@+id/file_naming_bout_counter_minus_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="38dp"
+                                android:minHeight="38dp"
+                                android:text="-"
+                                tools:ignore="HardcodedText" />
+
+                            <Button
+                                android:id="@+id/file_naming_bout_counter_reset_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="38dp"
+                                android:minHeight="38dp"
+                                android:text="0"
+                                tools:ignore="HardcodedText" />
+                        </androidx.appcompat.widget.LinearLayoutCompat>
+
+                        <androidx.appcompat.widget.LinearLayoutCompat
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="start">
+
+                            <TextView
+                                android:id="@+id/file_naming_exchange_counter_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:labelFor="@+id/file_naming_exchange_counter"
+                                android:text="@string/camera_settings_file_naming_exchange_counter" />
+
+                            <cz.zegkljan.videoreferee.utils.NonRestoringEditText
+                                android:id="@+id/file_naming_exchange_counter"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:digits="0123456789"
+                                android:importantForAutofill="no"
+                                android:inputType="numberDecimal" />
+
+                            <Button
+                                android:id="@+id/file_naming_exchange_counter_plus_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="38dp"
+                                android:minHeight="38dp"
+                                android:text="+"
+                                tools:ignore="HardcodedText" />
+
+                            <Button
+                                android:id="@+id/file_naming_exchange_counter_minus_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="38dp"
+                                android:minHeight="38dp"
+                                android:text="-"
+                                tools:ignore="HardcodedText" />
+
+                            <Button
+                                android:id="@+id/file_naming_exchange_counter_reset_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="38dp"
+                                android:minHeight="38dp"
+                                android:text="0"
+                                tools:ignore="HardcodedText" />
+                        </androidx.appcompat.widget.LinearLayoutCompat>
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+                </RelativeLayout>
+
+                <Button
+                    android:id="@+id/continue_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="32dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/camera_settings_continue" />
             </androidx.appcompat.widget.LinearLayoutCompat>
-        </RelativeLayout>
-
-        <Button
-            android:id="@+id/continue_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="32dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/camera_settings_continue" />
+        </ScrollView>
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
