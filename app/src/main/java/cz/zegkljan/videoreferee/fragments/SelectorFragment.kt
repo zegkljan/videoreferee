@@ -89,22 +89,14 @@ class SelectorFragment : Fragment() {
 
         fragmentSelectorBinding.continueButton.isEnabled = false
         fragmentSelectorBinding.continueButton.setOnClickListener {
-            val dir = if (isSelectedFpsHighSpeed!!) {
-                SelectorFragmentDirections.actionSelectorToHighSpeedCamera(
+            Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(
+                SelectorFragmentDirections.actionSelectorToCamera(
                     selectedCamera!!.id,
                     selectedResolution!!.width,
                     selectedResolution!!.height,
                     selectedFps!!
                 )
-            } else {
-                SelectorFragmentDirections.actionSelectorToNormalSpeedCamera(
-                    selectedCamera!!.id,
-                    selectedResolution!!.width,
-                    selectedResolution!!.height,
-                    selectedFps!!
-                )
-            }
-            Navigation.findNavController(requireActivity(), R.id.fragment_container).navigate(dir)
+            )
         }
     }
 

@@ -22,13 +22,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.hardware.camera2.*
+import android.hardware.camera2.params.StreamConfigurationMap
 import android.media.MediaCodec
 import android.media.MediaRecorder
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.util.Log
 import android.util.Range
+import android.util.Size
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -48,7 +49,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class NormalSpeedCameraFragment : Fragment() {
+class CameraFragment : Fragment() {
 
     /** Android ViewBinding */
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
@@ -56,7 +57,11 @@ class NormalSpeedCameraFragment : Fragment() {
     private val fragmentCameraBinding get() = _fragmentCameraBinding!!
 
     /** AndroidX navigation arguments */
-    private val args: NormalSpeedCameraFragmentArgs by navArgs()
+    private val args: CameraFragmentArgs by navArgs()
+
+    private val isHighSpeed: Boolean by lazy {
+        args.fps >= 120
+    }
 
     /** Host's navigation controller */
     private val navController: NavController by lazy {
@@ -105,6 +110,9 @@ class NormalSpeedCameraFragment : Fragment() {
     private val cameraHandler = Handler(cameraThread.looper)
 
     /** Captures high speed frames from a [CameraDevice] for our slow motion video recording */
+    private lateinit var highSpeedSession: CameraConstrainedHighSpeedCaptureSession
+
+    /** Captures frames from a [CameraDevice] for our video recording */
     private lateinit var session: CameraCaptureSession
 
     /** The [CameraDevice] that will be opened in this fragment */
@@ -112,14 +120,51 @@ class NormalSpeedCameraFragment : Fragment() {
 
     private var medium: Medium? = null
 
+    /** Requests used for preview only in the [CameraConstrainedHighSpeedCaptureSession] */
+    private val previewRequestList: List<CaptureRequest> by lazy {
+        // Capture request holds references to target surfaces
+        highSpeedSession.device.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
+            // Add the preview surface target
+            addTarget(fragmentCameraBinding.viewFinder.holder.surface)
+            // High speed capture session requires a target FPS range, even for preview only
+            set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, Range(FPS_PREVIEW_ONLY, args.fps))
+            set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
+            set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW)
+        }.let {
+            // Creates a list of highly optimized capture requests sent to the camera for a high
+            // speed video session. Important note: Must use repeating burst request type
+            highSpeedSession.createHighSpeedRequestList(it.build())
+        }
+    }
+
     /** Request used for preview only in the [CameraCaptureSession] */
     private val previewRequest: CaptureRequest by lazy {
-        // Log.d(TAG, "previewRequest lazy")
         // Capture request holds references to target surfaces
         session.device.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
             // Add the preview surface target
             addTarget(fragmentCameraBinding.viewFinder.holder.surface)
+            set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
+            set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_PREVIEW)
         }.build()
+    }
+
+    /** Requests used for preview and recording in the [CameraConstrainedHighSpeedCaptureSession] */
+    private val recordRequestList: List<CaptureRequest> by lazy {
+        // Log.d(TAG, "recordRequestList lazy")
+        // Capture request holds references to target surfaces
+        highSpeedSession.device.createCaptureRequest(CameraDevice.TEMPLATE_RECORD).apply {
+            // Add the preview and recording surface targets
+            addTarget(fragmentCameraBinding.viewFinder.holder.surface)
+            addTarget(recorderSurface)
+            // Sets user requested FPS for all targets
+            set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, Range(args.fps, args.fps))
+            set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
+            set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD)
+        }.let {
+            // Creates a list of highly optimized capture requests sent to the camera for a high
+            // speed video session. Important note: Must use repeating burst request type
+            highSpeedSession.createHighSpeedRequestList(it.build())
+        }
     }
 
     /** Request used for preview and recording in the [CameraCaptureSession] */
@@ -132,6 +177,8 @@ class NormalSpeedCameraFragment : Fragment() {
             addTarget(recorderSurface)
             // Sets user requested FPS for all targets
             set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, Range(args.fps, args.fps))
+            set(CaptureRequest.CONTROL_MODE, CaptureRequest.CONTROL_MODE_AUTO)
+            set(CaptureRequest.CONTROL_CAPTURE_INTENT, CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD)
         }.build()
     }
 
@@ -215,14 +262,32 @@ class NormalSpeedCameraFragment : Fragment() {
         val targets = listOf(fragmentCameraBinding.viewFinder.holder.surface, recorderSurface)
 
         // Start a capture session using our open camera and list of Surfaces where frames will go
-        session = createCaptureSession(camera, targets, cameraHandler)
+        if (isHighSpeed) {
+            highSpeedSession = createHighSpeedCaptureSession(camera, targets, cameraHandler)
+        } else {
+            session = createCaptureSession(camera, targets, cameraHandler)
+        }
+
+        if (isHighSpeed) {
+            // Ensures the requested size and FPS are compatible with this camera
+            val fpsRange = Range(args.fps, args.fps)
+            assert(
+                true == characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                    ?.getHighSpeedVideoFpsRangesFor(Size(args.width, args.height))
+                    ?.contains(fpsRange)
+            )
+        }
 
         // Sends the capture request as frequently as possible until the session is torn down or
         // session.stopRepeating() is called
-        session.setRepeatingRequest(previewRequest, null, cameraHandler)
+        if (isHighSpeed) {
+            highSpeedSession.setRepeatingBurst(previewRequestList, null, cameraHandler)
+        } else {
+            session.setRepeatingRequest(previewRequest, null, cameraHandler)
+        }
 
         // Listen to the capture button
-        fragmentCameraBinding.captureButton.setOnCheckedChangeListener { view, isChecked ->
+        fragmentCameraBinding.captureButton.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 lifecycleScope.launch(Dispatchers.IO) {
 
@@ -230,14 +295,20 @@ class NormalSpeedCameraFragment : Fragment() {
                     requireActivity().requestedOrientation =
                         ActivityInfo.SCREEN_ORIENTATION_LOCKED
 
-                    // Start recording repeating requests, which will stop the ongoing preview
-                    //  repeating requests without having to explicitly call `session.stopRepeating`
-                    session.setRepeatingRequest(recordRequest, null, cameraHandler)
+                    // Stops preview requests, and start record requests
+                    if (isHighSpeed) {
+                        highSpeedSession.stopRepeating()
+                        highSpeedSession.setRepeatingBurst(recordRequestList, null, cameraHandler)
+                    } else {
+                        session.stopRepeating()
+                        session.setRepeatingRequest(recordRequest, null, cameraHandler)
+                    }
 
                     // Finalizes recorder setup and starts recording
                     recorder.apply {
                         // Sets output orientation based on current sensor value at start time
                         relativeOrientation.value?.let { setOrientationHint(it) }
+
                         // Sets the output file
                         val ctx = requireContext()
                         medium = Medium.create(
@@ -247,7 +318,6 @@ class NormalSpeedCameraFragment : Fragment() {
                                 )
                             }_E${prefs.getInt(EXCHANGE_COUNTER_KEY, 0)}.mp4"
                         )
-                        Log.d(TAG, medium.toString())
                         setOutputFile(medium!!.getWriteFileDescriptor(ctx))
 
                         prepare()
@@ -281,13 +351,12 @@ class NormalSpeedCameraFragment : Fragment() {
                     // navigate to player
                     requireActivity().runOnUiThread {
                         navController.navigate(
-                            NormalSpeedCameraFragmentDirections.actionNormalSpeedCameraToPlayer(
+                            CameraFragmentDirections.actionCameraToPlayer(
                                 medium!!.getUriString(),
                                 args.cameraId,
                                 args.width,
                                 args.height,
-                                args.fps,
-                                false
+                                args.fps
                             )
                         )
                     }
@@ -303,7 +372,6 @@ class NormalSpeedCameraFragment : Fragment() {
         cameraId: String,
         handler: Handler? = null
     ): CameraDevice = suspendCancellableCoroutine { cont ->
-        // Log.d(TAG, "openCamera")
         manager.openCamera(cameraId, object : CameraDevice.StateCallback() {
             override fun onOpened(device: CameraDevice) {
                 // Log.d(TAG, "openCamera/onOpened")
@@ -331,6 +399,36 @@ class NormalSpeedCameraFragment : Fragment() {
                 if (cont.isActive) cont.resumeWithException(exc)
             }
         }, handler)
+    }
+
+    /**
+     * Creates a [CameraConstrainedHighSpeedCaptureSession] and returns the configured session (as the result of the
+     * suspend coroutine)
+     */
+    private suspend fun createHighSpeedCaptureSession(
+        device: CameraDevice,
+        targets: List<Surface>,
+        handler: Handler? = null
+    ): CameraConstrainedHighSpeedCaptureSession = suspendCoroutine { cont ->
+        // Log.d(TAG, "createCaptureSession")
+        // Creates a capture session using the predefined targets, and defines a session state
+        // callback which resumes the coroutine once the session is configured
+        device.createConstrainedHighSpeedCaptureSession(
+            targets, object : CameraCaptureSession.StateCallback() {
+
+                override fun onConfigured(session: CameraCaptureSession) {
+                    // Log.d(TAG, "createCaptureSession/onConfigured")
+                    cont.resume(session as CameraConstrainedHighSpeedCaptureSession)
+                }
+
+                override fun onConfigureFailed(session: CameraCaptureSession) {
+                    // Log.d(TAG, "createCaptureSession/onConfigureFailed")
+                    val exc = RuntimeException("Camera ${device.id} session configuration failed")
+                    // Log.e(TAG, exc.message, exc)
+                    cont.resumeWithException(exc)
+                }
+            }, handler
+        )
     }
 
     /**
@@ -388,9 +486,15 @@ class NormalSpeedCameraFragment : Fragment() {
     }
 
     companion object {
-        private val TAG = NormalSpeedCameraFragment::class.java.simpleName
+        private val TAG = CameraFragment::class.java.simpleName
 
         private const val RECORDER_VIDEO_BITRATE: Int = 10000000
         private const val MIN_REQUIRED_RECORDING_TIME_MILLIS: Long = 1000L
+
+        /**
+         * FPS rate for preview-only requests, 30 is *guaranteed* by framework. See:
+         * [StreamConfigurationMap.getHighSpeedVideoFpsRanges]
+         */
+        private const val FPS_PREVIEW_ONLY: Int = 30
     }
 }

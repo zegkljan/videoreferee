@@ -181,21 +181,12 @@ class PlayerFragment : Fragment() {
                 .apply()
             Log.d(TAG, "keep: bout counter: ${prefs.getInt(BOUT_COUNTER_KEY, 0)}")
             Log.d(TAG, "keep: exchange counter: ${prefs.getInt(EXCHANGE_COUNTER_KEY, 0)}")
-            val navDirections: NavDirections = if (args.isHighSpeed) {
-                PlayerFragmentDirections.actionPlayerToHighSpeedCamera(
-                    args.cameraId,
-                    args.width,
-                    args.height,
-                    args.fps
-                )
-            } else {
-                PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(
-                    args.cameraId,
-                    args.width,
-                    args.height,
-                    args.fps
-                )
-            }
+            val navDirections: NavDirections = PlayerFragmentDirections.actionPlayerToCamera(
+                args.cameraId,
+                args.width,
+                args.height,
+                args.fps
+            )
             navController.navigate(navDirections)
         }
         fragmentPlayerBinding.deleteButton.setOnClickListener {
@@ -208,21 +199,12 @@ class PlayerFragment : Fragment() {
                 .apply()
             Log.d(TAG, "delete: bout counter: ${prefs.getInt(BOUT_COUNTER_KEY, 0)}")
             Log.d(TAG, "delete: exchange counter: ${prefs.getInt(EXCHANGE_COUNTER_KEY, 0)}")
-            val navDirections: NavDirections = if (args.isHighSpeed) {
-                PlayerFragmentDirections.actionPlayerToHighSpeedCamera(
-                    args.cameraId,
-                    args.width,
-                    args.height,
-                    args.fps
-                )
-            } else {
-                PlayerFragmentDirections.actionPlayerToNormalSpeedCamera(
-                    args.cameraId,
-                    args.width,
-                    args.height,
-                    args.fps
-                )
-            }
+            val navDirections: NavDirections = PlayerFragmentDirections.actionPlayerToCamera(
+                args.cameraId,
+                args.width,
+                args.height,
+                args.fps
+            )
             navController.navigate(navDirections)
         }
     }
