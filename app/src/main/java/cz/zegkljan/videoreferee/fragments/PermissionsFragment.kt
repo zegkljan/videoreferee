@@ -71,6 +71,7 @@ class PermissionsFragment : Fragment() {
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {

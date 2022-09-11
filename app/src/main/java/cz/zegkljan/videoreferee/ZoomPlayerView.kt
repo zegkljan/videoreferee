@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Matrix
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
-import android.util.Log
 import android.view.SurfaceView
 import android.view.View
 import com.google.android.exoplayer2.Player
@@ -73,7 +72,7 @@ class ZoomPlayerView(context: Context, attrs: AttributeSet?) : PlayerView(contex
             }
         }
         if (player.isCommandAvailable(Player.COMMAND_GET_TEXT)) {
-            subtitleView?.setCues(player.currentCues)
+            subtitleView?.setCues(player.currentCues.cues)
         }
     }
 
