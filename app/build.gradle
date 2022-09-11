@@ -102,6 +102,9 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-ui:$exoplayer_version"
 
+    // Zoomable view
+    implementation "com.otaliastudios:zoomlayout:1.9.0"
+
     // Vertical seekbar
     implementation 'com.h6ah4i.android.widget.verticalseekbar:verticalseekbar:1.0.0'
 

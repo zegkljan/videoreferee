@@ -33,7 +33,6 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
 import cz.zegkljan.videoreferee.R
 import cz.zegkljan.videoreferee.databinding.FragmentPlayerBinding
 import cz.zegkljan.videoreferee.utils.BOUT_COUNTER_KEY
@@ -59,7 +58,7 @@ class PlayerFragment : Fragment() {
     }
 
     /**  Player */
-    private var player: SimpleExoPlayer? = null
+    private var player: ExoPlayer? = null
     private val playbackStateListener: Player.Listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
             val stateString: String = when (playbackState) {
@@ -99,7 +98,7 @@ class PlayerFragment : Fragment() {
     private fun initializePlayer() {
         mspf = (1000f / args.fps).roundToInt()
 
-        player = SimpleExoPlayer.Builder(requireContext())
+        player = ExoPlayer.Builder(requireContext())
             .build()
             .also { exoPlayer ->
                 fragmentPlayerBinding.playerView.player = exoPlayer
@@ -212,7 +211,7 @@ class PlayerFragment : Fragment() {
     private fun releasePlayer() {
         player?.run {
             playbackPosition = this.currentPosition
-            currentWindow = this.currentWindowIndex
+            currentWindow = this.currentMediaItemIndex
             plWhenReady = this.playWhenReady
             removeListener(playbackStateListener)
             release()
